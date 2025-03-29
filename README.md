@@ -17,11 +17,13 @@ O MCP (Model Context Protocol) é um protocolo padronizado que facilita a comuni
 
 ## Sobre o TESS
 
-O TESS é uma plataforma que oferece APIs para integração de agentes de IA e capacidades de gerenciamento de arquivos em aplicações. Este projeto consome a API oficial do TESS para:
+O TESS (Tool Execution Subsystem) é uma plataforma que orquestra e gerencia ferramentas que podem ser utilizadas por modelos de IA. Este projeto consome a API oficial do TESS para:
 
 - Listar e executar agentes de IA
 - Fazer upload e gerenciar arquivos
 - Interagir com modelos de linguagem como o "tess-ai-light"
+
+O TESS trabalha em conjunto com o MCP, permitindo que modelos solicitem e utilizem ferramentas de forma padronizada.
 
 Para mais informações, consulte a [documentação oficial da API TESS](https://docs.tess.pareto.io/api/introduction).
 
@@ -57,7 +59,48 @@ O projeto segue a Clean Architecture com as seguintes camadas:
 ### 4. Interface de Usuário
 
 - `src/commands`: Comandos CLI para interação com os casos de uso
-- `src/adapters`: Adaptadores para compatibilidade com código legado
+- `src/adapters`: Adaptadores para compatibilidade entre implementações
+
+## Arquitetura de Adaptadores
+
+### Papel dos Adaptadores
+
+Os adaptadores no projeto são **componentes arquiteturais intencionais** que servem a propósitos específicos:
+
+1. **Desacoplamento entre sistemas**:
+   - MCP e TESS são sistemas com responsabilidades distintas que evoluem independentemente
+   - Os adaptadores permitem que essas evoluções ocorram sem quebrar a integração
+
+2. **Tradução entre interfaces**:
+   - Convertem chamadas e dados entre o formato esperado por cada sistema
+   - Protegem o domínio de mudanças nas APIs externas
+
+3. **Implementação do padrão Ports & Adapters**:
+   - Facilitam testes unitários e simulações
+   - Permitem substituir implementações sem afetar o domínio
+
+### Tipos de Adaptadores
+
+O projeto utiliza dois tipos principais de adaptadores:
+
+1. **Adaptadores de Infraestrutura**: 
+   - Localização: `infrastructure/providers`
+   - Propósito: Conectar as interfaces do domínio com APIs externas
+   - Exemplo: `TessApiProvider` adapta a API do TESS para a interface `ITessProvider` do domínio
+
+2. **Adaptadores de Compatibilidade**:
+   - Localização: `src/adapters`
+   - Propósito: Manter compatibilidade com código existente enquanto usa as novas implementações
+   - Exemplo: `MCPRunClient` adapta a nova implementação para código que ainda usa a interface antiga
+
+### Otimização de Adaptadores
+
+Nosso foco é manter adaptadores eficientes através de:
+
+- Interfaces padronizadas com contratos claros
+- Minimização de conversões desnecessárias
+- Cobertura adequada de testes
+- Documentação das responsabilidades de cada adaptador
 
 ## Funcionalidades
 
@@ -106,23 +149,28 @@ arcee chat "Explique o conceito de Clean Architecture"
 arcee generate "Escreva um código Python para ordenar uma lista"
 ```
 
-## Compatibilidade com Código Legado
+## Garantindo Compatibilidade e Evolução
 
-Para manter compatibilidade com código legado, o projeto inclui adaptadores que redirecionam chamadas antigas para a nova implementação:
+O projeto usa adaptadores para permitir evolução contínua enquanto mantém compatibilidade:
 
 ```python
-# Código legado (ainda funciona)
+# Código existente (continua funcionando)
 from src.tools.mcpx_simple import MCPRunClient
 
 client = MCPRunClient(session_id="abc123")
 tools = client.get_tools()
 
-# Código novo (recomendado)
+# Código novo (implementação atual)
 from infrastructure.mcp_client import MCPClient
 
 client = MCPClient()
 tools = client.list_tools()
 ```
+
+Este modelo de adaptadores permite:
+- Evolução gradual sem quebrar código existente
+- Melhoria contínua da implementação interna
+- Facilidade de migração para novos clientes
 
 ## Desenvolvimento
 
