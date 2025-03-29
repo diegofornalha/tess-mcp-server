@@ -1,0 +1,95 @@
+[MASTER]
+# Carrega o checker personalizado de arquitetura
+load-plugins=tools.linting.architecture_checker
+
+# Arquivos ou diretórios a ignorar
+ignore=venv,node_modules,__pycache__,.git,mcp_server_tess_xtp
+
+# Usar múltiplos processos para acelerar a análise
+jobs=0
+
+[MESSAGES CONTROL]
+# Desabilitar mensagens específicas
+disable=
+    C0111, # missing-docstring
+    C0103, # invalid-name
+    C0303, # trailing-whitespace
+    W0613, # unused-argument
+    W0212, # protected-access
+    R0903, # too-few-public-methods
+    R0913, # too-many-arguments
+    R0914, # too-many-locals
+    R0801, # duplicate-code
+    W0511, # fixme
+
+# Habilitar mensagens específicas de arquitetura
+enable=
+    domain-imports-outer-layer,
+    application-imports-outer-layer,
+    infrastructure-imports-interface-layer,
+    architectural-dependency-violation
+
+[REPORTS]
+# Formato de saída (text, colorized, json, msvs)
+output-format=colorized
+
+# Inclui análise de código morto
+include-ids=yes
+
+# Inclui mensagem de id/código
+include-message=yes
+
+[BASIC]
+# Comprimento máximo para nomes
+variable-rgx=[a-z_][a-z0-9_]{0,30}$
+function-rgx=[a-z_][a-z0-9_]{0,30}$
+method-rgx=[a-z_][a-z0-9_]{0,30}$
+attr-rgx=[a-z_][a-z0-9_]{0,30}$
+argument-rgx=[a-z_][a-z0-9_]{0,30}$
+class-attribute-rgx=([A-Za-z_][A-Za-z0-9_]{0,30}|(__.*__))$
+inlinevar-rgx=[A-Za-z_][A-Za-z0-9_]*$
+class-rgx=[A-Z_][a-zA-Z0-9]+$
+module-rgx=(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$
+
+[FORMAT]
+# Máximo de caracteres por linha
+max-line-length=100
+
+[DESIGN]
+# Máximo de argumentos para uma função
+max-args=10
+
+# Máximo de atributos para uma classe
+max-attributes=15
+
+# Máximo de diretivas de expressão booleana
+max-bool-expr=5
+
+# Máximo de complexidade ciclomática
+max-complexity=15
+
+# Máximo de statements em uma função
+max-statements=50
+
+[SIMILARITIES]
+# Mínimo de linhas para considerar duplicação
+min-similarity-lines=10
+
+# Ignorar importações em análise de similaridade
+ignore-imports=yes
+
+[TYPECHECK]
+# Módulos que não conseguem ser importados
+ignored-modules=
+
+[CLASSES]
+# Lista de membros válidos
+valid-classmethod-first-arg=cls
+
+[IMPORTS]
+# Módulos externos que podem ser importados
+ext-import-graph=
+
+[ARCHITECTURE]
+# Exceções de importação para regras arquiteturais (a serem configuradas)
+architecture-allowed-imports=domain.interfaces:domain.exceptions 

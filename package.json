@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@extism/extism": "^2.0.0-rc11",
+    "@modelcontextprotocol/sdk": "^1.8.0"
+  }
+}

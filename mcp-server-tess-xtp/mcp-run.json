@@ -1,0 +1,34 @@
+{
+  "name": "tess-tools",
+  "version": "1.0.0",
+  "description": "Ferramentas TESS para clientes MCP",
+  "author": "Sua Empresa",
+  "main": "tess-servlet.js",
+  "entry": "handleMcpCall",
+  "init": "init",
+  "tags": ["tess", "ai", "agents", "mcp"],
+  "type": "nodejs",
+  "config": {
+    "fields": [
+      {
+        "name": "TESS_API_KEY",
+        "description": "Chave de API para o TESS",
+        "required": true,
+        "type": "string",
+        "secret": true
+      },
+      {
+        "name": "TESS_API_URL",
+        "description": "URL da API TESS (opcional)",
+        "required": false,
+        "type": "string",
+        "default": "https://tess.pareto.io/api"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seu-usuario/mcp-server-tess-xtp"
+  },
+  "readme": "# Ferramentas TESS para MCP\n\nEste servlet expõe as funcionalidades do TESS como ferramentas MCP, permitindo que qualquer cliente MCP acesse agentes TESS, execute-os e gerencie arquivos. Para usar, você precisará de uma chave de API TESS válida.\n\n## Ferramentas disponíveis:\n\n- tess.list_agents: Lista os agentes disponíveis no TESS\n- tess.get_agent: Obtém detalhes de um agente específico\n- tess.execute_agent: Executa um agente com texto de entrada\n- tess.upload_file: Faz upload de um arquivo para o TESS"
+} 
