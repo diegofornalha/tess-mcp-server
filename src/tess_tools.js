@@ -257,12 +257,14 @@ function createTessTools(tessClient) {
         page: {
           type: 'number',
           description: 'Número da página para paginação',
-          default: 1
+          default: 1,
+          optional: true
         },
         per_page: {
           type: 'number',
           description: 'Número de itens por página',
-          default: 15
+          default: 15,
+          optional: true
         },
         type: {
           type: 'string',
@@ -366,4 +368,4 @@ function createTessTools(tessClient) {
 module.exports = {
   TessClient,
   createTessTools
-}; 
+};

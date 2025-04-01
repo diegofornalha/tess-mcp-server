@@ -6,12 +6,16 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "mcp-adapter": "node mcp-adapter.js",
     "setup": "./scripts/setup.sh",
+    "start:script": "./scripts/start.sh",
+    "dev:script": "./scripts/start.sh --dev",
     "smithery:build": "node ./scripts/smithery-build.js",
     "smithery:publish": "npx @smithery/cli@latest publish",
     "yolo": "node ./scripts/auto-run.js --start-server",
-    "yolo:shell": "./scripts/yolo.sh"
+    "yolo:shell": "./scripts/yolo.sh",
+    "docker:build": "docker build -t mcp-server-tess:latest .",
+    "docker:run": "docker run -p 3001:3001 --env-file .env mcp-server-tess:latest",
+    "test": "echo \"No tests implemented yet\""
   },
   "keywords": [
     "tess",
@@ -37,9 +41,13 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "form-data": "^4.0.2",
+    "js-yaml": "^4.1.0",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

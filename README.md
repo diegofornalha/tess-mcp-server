@@ -1,192 +1,158 @@
 # TESS-MCP Server
 
-Servidor MCP para integração com a API TESS, permitindo utilizar agentes TESS através do protocolo MCP (Model Context Protocol).
+Servidor MCP (Model Context Protocol) para integração com a API TESS, permitindo utilizar agentes TESS através do protocolo MCP.
 
-## 📚 Sobre
+## Sobre
 
-TESS-MCP Server é um adaptador que permite utilizar os agentes TESS através do protocolo MCP, facilitando a integração com modelos de IA como GPT-4, Claude e outros que suportem o padrão MCP.
+O TESS-MCP Server cria uma ponte entre os agentes TESS e ferramentas que utilizam o protocolo MCP. Isso permite que qualquer cliente compatível com MCP (como Claude, ChatGPT ou outros LLMs) possa acessar e controlar agentes TESS.
 
+## Recursos
 
-## 🚀 Características
+- ✅ Listar agentes TESS disponíveis
+- ✅ Obter detalhes de agentes específicos
+- ✅ Executar agentes com texto e arquivos
+- ✅ Fazer upload de arquivos para processamento
+- ✅ Integração com Smithery para distribuição
+- ✅ Modo YOLO para execução automática
 
-- **Integração TESS-MCP**: Execução de agentes TESS via protocolo MCP
-- **Ferramentas disponíveis**:
-  - `tess.list_agents`: Lista os agentes disponíveis no TESS
-  - `tess.get_agent`: Obtém detalhes de um agente específico
-  - `tess.execute_agent`: Executa um agente TESS
-  - `tess.upload_file`: Faz upload de um arquivo para o TESS
-- **WebSocket**: Comunicação em tempo real para monitoramento de execuções
-- **Cliente de exemplo**: Interface web para testar as ferramentas
-- **Scripts utilitários**: Configuração, inicialização e demonstração
+## Pré-requisitos
 
-## 🔧 Instalação
+- Node.js v18 ou superior
+- Conta TESS com chave de API válida
+- npm ou yarn
 
-### Pré-requisitos
+## Instalação
 
-- Node.js 18 ou superior
-- NPM
-- Chave de API TESS válida
-
-### Configuração
-
-1. Clone o repositório:
 ```bash
+# Clonar o repositório
 git clone https://github.com/diegofornalha/mcp-server-tess.git
 cd mcp-server-tess
+
+# Instalar dependências
+npm install
+
+# Executar script de configuração
+npm run setup
 ```
 
-2. Execute o script de configuração:
-```bash
-./scripts/setup.sh
+## Configuração
+
+Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+
+```
+# Chave de API TESS (obrigatória)
+TESS_API_KEY=sua_chave_api_aqui
+
+# URL da API TESS (opcional)
+TESS_API_URL=https://tess.pareto.io/api
+
+# Porta para o servidor MCP (opcional, padrão: 3001)
+PORT=3001
 ```
 
-3. Configure sua API Key do TESS no arquivo `.env`:
-```
-TESS_API_KEY="sua_api_key_aqui"
-```
-
-## 🖥️ Uso
+## Uso
 
 ### Iniciar o servidor
 
 ```bash
-# Modo desenvolvimento (com hot-reload)
-./scripts/start.sh
+# Modo normal
+npm start
 
-# Modo produção
-./scripts/start.sh --prod
+# Modo desenvolvimento (com reinício automático)
+npm run dev
+
+# Modo YOLO (execução automática sem confirmações)
+npm run yolo
 ```
 
-### Testar a conexão
+### Testando o servidor
 
-Acesse [http://localhost:3001](http://localhost:3001) em seu navegador para abrir o cliente de demonstração.
+Você pode testar o servidor com um simples comando curl:
 
-Ou verifique a saúde do servidor via terminal:
 ```bash
+# Verificar status do servidor
 curl http://localhost:3001/health
+
+# Listar ferramentas disponíveis
+curl -X POST http://localhost:3001/tools/list
+
+# Executar uma ferramenta (listar agentes TESS)
+curl -X POST http://localhost:3001/tools/call \
+  -H "Content-Type: application/json" \
+  -d '{"name": "tess.list_agents", "arguments": {"page": 1, "per_page": 10}}'
 ```
 
-### Demonstração de integração
+## Integração com Smithery
 
-Execute a demonstração de integração para ver como utilizar o TESS-MCP em uma aplicação:
+Este servidor pode ser publicado como um pacote Smithery para fácil distribuição:
 
 ```bash
-./scripts/run-integration.sh
-```
-
-## 🧩 Integração com MCP
-
-### Listar ferramentas
-
-```js
-const response = await fetch('http://localhost:3001/tools/list', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({})
-});
-
-const tools = await response.json();
-console.log(tools);
-```
-
-### Chamar uma ferramenta
-
-```js
-const response = await fetch('http://localhost:3001/tools/call', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    name: 'tess.execute_agent',
-    arguments: {
-      agent_id: '123',
-      input_text: 'Olá, TESS!'
-    }
-  })
-});
-
-const result = await response.json();
-console.log(result);
-```
-
-## 📋 API MCP
-
-O TESS-MCP Server expõe os seguintes endpoints MCP:
-
-| Endpoint | Método | Descrição |
-|----------|--------|-----------|
-| `/tools/list` | POST | Lista as ferramentas disponíveis |
-| `/tools/call` | POST | Executa uma ferramenta |
-| `/health` | GET | Verifica o status do servidor |
-
-## 📘 Comparação com DesktopCommanderMCP
-
-O TESS-MCP Server foi aprimorado com inspiração no DesktopCommanderMCP, aplicando as seguintes melhorias:
-
-- **Estrutura organizada**: Separação clara de responsabilidades em módulos
-- **Scripts confiáveis**: Scripts de configuração e inicialização inspirados no DesktopCommanderMCP
-- **Documentação detalhada**: Instruções claras de instalação, uso e integração
-- **Cliente de demonstração**: Interface web para testar a API
-- **Exemplo de integração**: Código JavaScript demonstrando o uso em aplicações
-
-## 📦 Publicação e Distribuição
-
-### Publicar no GitHub
-
-Para publicar este projeto no GitHub:
-
-1. Crie um novo repositório em [GitHub](https://github.com/new)
-2. Inicialize o Git e envie para o GitHub:
-
-```bash
-git init
-git add .
-git commit -m "Versão inicial do servidor TESS-MCP"
-git branch -M main
-git remote add origin https://github.com/seu-usuario/mcp-server-tess.git
-git push -u origin main
-```
-
-### Publicar no Smithery
-
-Este projeto está configurado para ser publicado na plataforma Smithery, permitindo que outros usuários utilizem o servidor TESS-MCP facilmente.
-
-1. Gere o arquivo de configuração do Smithery:
-```bash
+# Preparar para publicação
 npm run smithery:build
-```
 
-2. Faça login no Smithery CLI:
-```bash
-npx @smithery/cli@latest login
-```
-
-3. Publique o projeto:
-```bash
+# Publicar no registro Smithery
 npm run smithery:publish
 ```
 
-4. Após a publicação, usuários poderão instalar o servidor com:
+## Ferramentas disponíveis
+
+O servidor expõe as seguintes ferramentas MCP:
+
+### tess.list_agents
+
+Lista os agentes disponíveis no TESS.
+
+**Parâmetros:**
+- `page` (number, opcional): Número da página para paginação (padrão: 1)
+- `per_page` (number, opcional): Itens por página (padrão: 15)
+- `type` (string, opcional): Filtro por tipo de agente
+- `q` (string, opcional): Termo de busca para filtrar agentes
+
+### tess.get_agent
+
+Obtém detalhes de um agente específico no TESS.
+
+**Parâmetros:**
+- `agent_id` (string, obrigatório): ID do agente
+
+### tess.execute_agent
+
+Executa um agente específico no TESS.
+
+**Parâmetros:**
+- `agent_id` (string, obrigatório): ID do agente
+- `input_text` (string, obrigatório): Texto de entrada para o agente
+- `temperature` (string, opcional): Temperatura para geração (0 a 1, padrão: 1)
+- `model` (string, opcional): Modelo a ser usado (padrão: tess-ai-light)
+- `file_ids` (array, opcional): IDs de arquivos a serem usados
+- `wait_execution` (boolean, opcional): Aguardar conclusão da execução (padrão: false)
+
+### tess.upload_file
+
+Faz upload de um arquivo para o TESS.
+
+**Parâmetros:**
+- `file_path` (string, obrigatório): Caminho do arquivo a ser enviado
+- `process` (boolean, opcional): Se o arquivo deve ser processado após o upload (padrão: false)
+
+## Modo YOLO
+
+O "modo YOLO" (You Only Live Once) permite a execução automática de comandos sem necessidade de confirmações manuais. Isso é útil para ambientes de desenvolvimento e testes rápidos.
+
+Para ativar o modo YOLO:
+
 ```bash
-npx -y @smithery/cli@latest install @seu-usuario/mcp-server-tess --client claude --config '{"TESS_API_KEY":"sua_chave_api"}'
+# Via npm
+npm run yolo
+
+# Via shell script
+./scripts/yolo.sh
 ```
 
-5. Para testar localmente antes de publicar:
-```bash
-npx @smithery/cli@latest run .
-```
+## Licença
 
-## 🔒 Segurança
+MIT
 
-- Proteja sua API Key do TESS
-- Configure corretamente as origins CORS em ambiente de produção
-- Limite o acesso ao servidor em ambientes de produção
+## Contato
 
-## 📄 Licença
-
-Este projeto é licenciado sob a [Licença MIT](LICENSE).
-
-## 🙏 Agradecimentos
-
-- [DesktopCommanderMCP](https://github.com/wonderwhy-er/DesktopCommanderMCP) por fornecer inspiração para a estrutura e scripts
-- [TESS API](https://tess.pareto.io) por fornecer a plataforma de agentes AI
-- [Model Context Protocol](https://modelcontextprotocol.github.io) por estabelecer o padrão de comunicação entre ferramentas e modelos 
+Para suporte ou dúvidas, entre em contato com a equipe TESS ou abra uma issue no GitHub.

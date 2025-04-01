@@ -1,7 +1,7 @@
+#!/usr/bin/env node
 /**
- * Ponto de entrada principal para o servidor TESS-MCP
- * 
- * Este módulo inicializa o servidor MCP e expõe as ferramentas TESS
+ * TESS-MCP Server
+ * Servidor MCP para integração com a API TESS
  */
 
 const express = require('express');
@@ -13,18 +13,16 @@ const { createMcpAdapter } = require('./adapters');
 dotenv.config();
 
 /**
- * Inicializa o servidor MCP com as ferramentas TESS
- * 
+ * Inicializa o servidor MCP
  * @param {Object} config - Configuração do servidor
- * @returns {Object} Servidor MCP configurado
+ * @returns {Object} Servidor Express configurado
  */
-function initializeMcpServer(config = {}) {
+function createServer(config = {}) {
   // Mesclar configuração fornecida com variáveis de ambiente
   const serverConfig = {
-    PORT: process.env.PORT || 3001,
-    TESS_API_KEY: process.env.TESS_API_KEY,
-    TESS_API_URL: process.env.TESS_API_URL || 'https://tess.pareto.io/api',
-    ...config
+    PORT: process.env.PORT || config.PORT || 3001,
+    TESS_API_KEY: process.env.TESS_API_KEY || config.TESS_API_KEY,
+    TESS_API_URL: process.env.TESS_API_URL || config.TESS_API_URL || 'https://tess.pareto.io/api'
   };
   
   // Verificar se a chave API foi fornecida
@@ -45,7 +43,7 @@ function initializeMcpServer(config = {}) {
     res.json({
       status: 'ok',
       version: '1.0.0',
-      message: 'Servidor TESS-MCP em execução'
+      message: 'TESS-MCP Server em execução'
     });
   });
   
@@ -91,29 +89,30 @@ function initializeMcpServer(config = {}) {
     }
   });
   
-  // Iniciar servidor
-  const server = {
-    start: () => {
-      return new Promise((resolve) => {
-        const httpServer = app.listen(serverConfig.PORT, () => {
-          console.log(`Servidor TESS-MCP rodando na porta ${serverConfig.PORT}`);
-          resolve(httpServer);
-        });
-      });
-    },
-    app,
-    adapter: mcpAdapter
-  };
-  
-  return server;
+  return app;
 }
 
-// Iniciar servidor se for executado diretamente
+/**
+ * Função principal para iniciar o servidor
+ */
+function main() {
+  try {
+    const app = createServer();
+    const PORT = process.env.PORT || 3001;
+    
+    app.listen(PORT, () => {
+      console.log(`Servidor TESS-MCP rodando na porta ${PORT}`);
+    });
+  } catch (error) {
+    console.error(`Erro ao iniciar servidor: ${error.message}`);
+    process.exit(1);
+  }
+}
+
+// Iniciar o servidor se este arquivo for executado diretamente
 if (require.main === module) {
-  const server = initializeMcpServer();
-  server.start();
+  main();
 }
 
-module.exports = {
-  initializeMcpServer
-};
+// Exportar as funções para uso como módulo
+module.exports = createServer;

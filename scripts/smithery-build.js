@@ -1,114 +1,118 @@
 /**
- * Script para preparar o projeto para publicação no Smithery
- * Este script gera o arquivo smithery.yaml necessário
+ * Script para preparar o pacote para publicação no Smithery
+ * 
+ * Este script configura o projeto para publicação no registro Smithery.
+ * Ele verifica a configuração, gera arquivos necessários e valida o projeto.
  */
 
 const fs = require('fs');
 const path = require('path');
+const yaml = require('js-yaml');
+const { execSync } = require('child_process');
 
-// Caminho para a raiz do projeto
-const ROOT_DIR = path.join(__dirname, '..');
-
-// Configuração do Smithery
-const smitheryConfig = {
-  name: 'mcp-server-tess',
-  description: 'Servidor MCP para integração com a API TESS, permitindo utilizar agentes TESS via MCP.',
-  version: '1.0.0',
-  main: './mcp-adapter.js',
-  license: 'MIT',
-  author: 'TESS Team',
-  homepage: 'https://github.com/diegofornalha/mcp-server-tess',
-  repository: 'https://github.com/diegofornalha/mcp-server-tess',
-  configSchema: {
-    type: 'object',
-    properties: {
-      TESS_API_KEY: {
-        type: 'string',
-        description: 'Chave de API TESS (obrigatória)'
-      },
-      TESS_API_URL: {
-        type: 'string',
-        description: 'URL da API TESS (opcional)',
-        default: 'https://tess.pareto.io/api'
-      },
-      PORT: {
-        type: 'number',
-        description: 'Porta para o servidor MCP',
-        default: 3001
-      }
-    },
-    required: ['TESS_API_KEY']
-  },
-  dependencies: [
-    'axios',
-    'cors',
-    'dotenv',
-    'express',
-    'form-data',
-    'socket.io'
-  ],
-  engines: {
-    node: '>=18.0.0'
-  },
-  keywords: [
-    'tess',
-    'mcp',
-    'ai',
-    'model-context-protocol',
-    'agent',
-    'smithery'
-  ]
+// Cores para console
+const colors = {
+  reset: '\x1b[0m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  red: '\x1b[31m'
 };
 
-// Converter para YAML
-const yaml = `# Configuração do Smithery para mcp-server-tess
-name: ${smitheryConfig.name}
-description: ${smitheryConfig.description}
-version: ${smitheryConfig.version}
-main: ${smitheryConfig.main}
-license: ${smitheryConfig.license}
-author: ${smitheryConfig.author}
-homepage: ${smitheryConfig.homepage}
-repository: ${smitheryConfig.repository}
+/**
+ * Log colorido
+ */
+const log = {
+  info: (msg) => console.log(`${colors.blue}ℹ️ ${msg}${colors.reset}`),
+  success: (msg) => console.log(`${colors.green}✅ ${msg}${colors.reset}`),
+  warn: (msg) => console.log(`${colors.yellow}⚠️ ${msg}${colors.reset}`),
+  error: (msg) => console.log(`${colors.red}❌ ${msg}${colors.reset}`)
+};
 
-# Esquema de configuração
-configSchema:
-  type: object
-  properties:
-    TESS_API_KEY:
-      type: string
-      description: "Chave de API TESS (obrigatória)"
-    TESS_API_URL:
-      type: string
-      description: "URL da API TESS (opcional)"
-      default: "https://tess.pareto.io/api"
-    PORT:
-      type: number
-      description: "Porta para o servidor MCP"
-      default: 3001
-  required:
-    - TESS_API_KEY
+/**
+ * Verifica se um arquivo existe
+ */
+function fileExists(filePath) {
+  try {
+    return fs.statSync(filePath).isFile();
+  } catch (err) {
+    return false;
+  }
+}
 
-# Dependências e requisitos
-engines:
-  node: ">=18.0.0"
-keywords:
-  - tess
-  - mcp
-  - ai
-  - model-context-protocol
-  - agent
-  - smithery
-`;
+/**
+ * Função principal
+ */
+async function main() {
+  log.info('Iniciando preparação para publicação no Smithery...');
+  
+  try {
+    // Verificar arquivo smithery.yaml
+    const smitheryPath = path.join(process.cwd(), 'smithery.yaml');
+    if (!fileExists(smitheryPath)) {
+      log.error('Arquivo smithery.yaml não encontrado.');
+      process.exit(1);
+    }
+    
+    // Ler configuração do Smithery
+    const smitheryConfig = yaml.load(fs.readFileSync(smitheryPath, 'utf8'));
+    log.success(`Configuração do Smithery carregada: ${smitheryConfig.name} v${smitheryConfig.version}`);
+    
+    // Verificar se package.json está sincronizado
+    const packagePath = path.join(process.cwd(), 'package.json');
+    if (fileExists(packagePath)) {
+      const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+      
+      if (packageJson.version !== smitheryConfig.version) {
+        log.warn(`Versão no package.json (${packageJson.version}) difere do smithery.yaml (${smitheryConfig.version}).`);
+        
+        // Atualizar package.json com versão do smithery.yaml
+        packageJson.version = smitheryConfig.version;
+        fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2));
+        log.success(`Versão no package.json atualizada para ${smitheryConfig.version}`);
+      } else {
+        log.success(`Versões sincronizadas (${packageJson.version})`);
+      }
+    }
+    
+    // Verificar arquivo principal
+    const mainFile = smitheryConfig.main || 'src/index.js';
+    const mainFilePath = path.join(process.cwd(), mainFile);
+    
+    if (!fileExists(mainFilePath)) {
+      log.error(`Arquivo principal '${mainFile}' não encontrado.`);
+      process.exit(1);
+    }
+    
+    log.success(`Arquivo principal '${mainFile}' encontrado.`);
+    
+    // Verificar dependências (opcionalmente)
+    try {
+      log.info('Verificando dependências...');
+      execSync('npm ls --depth=0', { stdio: 'pipe' });
+      log.success('Dependências verificadas.');
+    } catch (error) {
+      log.warn('Problemas com dependências detectados. Verifique com npm ls.');
+    }
+    
+    // Preparar para publicação
+    log.info('Preparando para publicação...');
+    
+    // Verificar se o login no Smithery CLI é necessário
+    // (Isso é feito automaticamente pelo comando de publicação)
+    
+    // Conclusão
+    log.success('Projeto pronto para publicação no Smithery!');
+    log.info(`Para publicar, execute: npm run smithery:publish`);
+    
+  } catch (error) {
+    log.error(`Erro durante a preparação: ${error.message}`);
+    process.exit(1);
+  }
+}
 
-// Escrever o arquivo smithery.yaml
-fs.writeFileSync(path.join(ROOT_DIR, 'smithery.yaml'), yaml);
-
-console.log('✅ Arquivo smithery.yaml gerado com sucesso!');
-console.log('');
-console.log('Para publicar no Smithery:');
-console.log('1. Certifique-se de ter feito login no Smithery CLI: npx @smithery/cli@latest login');
-console.log('2. Execute: npm run smithery:publish');
-console.log('');
-console.log('Para testar localmente antes de publicar:');
-console.log('npx @smithery/cli@latest run .'); 
+// Executar script
+main().catch(err => {
+  log.error(`Erro fatal: ${err.message}`);
+  process.exit(1);
+});

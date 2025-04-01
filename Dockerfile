@@ -1,21 +1,26 @@
 # Imagem base
 FROM node:18-alpine
 
-# Variáveis de ambiente
-ENV NODE_ENV=production
-
-# Diretório de trabalho
+# Criar diretório da aplicação
 WORKDIR /app
 
-# Instalar pacotes do sistema necessários
-RUN apk add --no-cache curl
-
-# Copiar arquivos de dependências e instalar
+# Copiar arquivos de configuração
 COPY package*.json ./
+COPY smithery.yaml ./
+
+# Instalar dependências
 RUN npm ci --only=production
 
 # Copiar código fonte
-COPY . .
+COPY src/ ./src/
+COPY scripts/ ./scripts/
+
+# Definir variáveis de ambiente
+ENV NODE_ENV=production
+ENV PORT=3001
+
+# Tornar scripts executáveis
+RUN chmod +x ./scripts/*.sh
 
 # Expor porta
 EXPOSE 3001
@@ -24,5 +29,5 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3001/health || exit 1
 
-# Comando para iniciar o servidor
+# Iniciar aplicação
 CMD ["node", "src/index.js"]

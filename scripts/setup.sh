@@ -1,245 +1,133 @@
 #!/bin/bash
-# Script de configuração para o TESS-MCP
-# Inspirado no DesktopCommanderMCP
+# Script de configuração para o TESS-MCP Server
+# Este script instala dependências e configura o ambiente
 
-set -e  # Interrompe o script se algum comando falhar
+# Cores para melhor visualização
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
 
-# Caminho para o diretório do projeto
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$PROJECT_DIR"
+# Banner
+echo -e "${BLUE}"
+echo -e "╔════════════════════════════════════════════╗"
+echo -e "║           TESS-MCP SERVER SETUP            ║"
+echo -e "║                                            ║"
+echo -e "║  Configuração do servidor de integração    ║"
+echo -e "║      entre TESS e protocolo MCP            ║"
+echo -e "╚════════════════════════════════════════════╝"
+echo -e "${NC}"
 
-echo "======================================================"
-echo "🔧 Configuração do Servidor TESS-MCP"
-echo "======================================================"
-echo ""
+# Função para verificar se um comando existe
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Verificar dependências
+echo -e "${YELLOW}Verificando dependências...${NC}"
 
 # Verificar Node.js
-echo "📋 Verificando Node.js..."
-if ! command -v node &> /dev/null; then
-    echo "❌ Node.js não encontrado. Por favor, instale o Node.js antes de continuar."
-    echo "   Acesse https://nodejs.org para baixar e instalar."
-    exit 1
+if command_exists node; then
+  NODE_VERSION=$(node -v)
+  echo -e "✅ Node.js encontrado: ${NODE_VERSION}"
+  
+  # Verificar versão mínima do Node.js (v18+)
+  NODE_MAJOR_VERSION=$(echo $NODE_VERSION | cut -d. -f1 | tr -d 'v')
+  if [ "$NODE_MAJOR_VERSION" -lt 18 ]; then
+    echo -e "${RED}⚠️  Versão do Node.js muito antiga. É recomendado usar v18 ou superior.${NC}"
+    
+    # Perguntar ao usuário se ele deseja continuar
+    read -p "Deseja continuar com a versão atual do Node.js? (s/n): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Ss]$ ]]; then
+      echo -e "${RED}Configuração cancelada. Por favor, atualize o Node.js e tente novamente.${NC}"
+      exit 1
+    fi
+  fi
+else
+  echo -e "${RED}❌ Node.js não encontrado. Por favor, instale o Node.js v18 ou superior.${NC}"
+  echo -e "Você pode baixar em: https://nodejs.org/"
+  exit 1
 fi
 
-NODE_VERSION=$(node -v)
-echo "✅ Node.js encontrado: $NODE_VERSION"
-
-# Verificar NPM
-echo "📋 Verificando NPM..."
-if ! command -v npm &> /dev/null; then
-    echo "❌ NPM não encontrado. Por favor, instale o NPM antes de continuar."
-    exit 1
+# Verificar npm
+if command_exists npm; then
+  NPM_VERSION=$(npm -v)
+  echo -e "✅ npm encontrado: ${NPM_VERSION}"
+else
+  echo -e "${RED}❌ npm não encontrado. Por favor, instale o npm.${NC}"
+  exit 1
 fi
 
-NPM_VERSION=$(npm -v)
-echo "✅ NPM encontrado: $NPM_VERSION"
-
-# Instalar dependências
-echo "📦 Instalando dependências do projeto..."
-npm install
+# Verificar git (opcional, mas útil)
+if command_exists git; then
+  GIT_VERSION=$(git --version | cut -d' ' -f3)
+  echo -e "✅ Git encontrado: ${GIT_VERSION}"
+else
+  echo -e "${YELLOW}⚠️  Git não encontrado. Não é obrigatório, mas é recomendado para controle de versão.${NC}"
+fi
 
 # Criar arquivo .env se não existir
-if [ ! -f ".env" ]; then
-    echo "📝 Criando arquivo .env a partir do .env.example..."
-    if [ -f ".env.example" ]; then
-        cp .env.example .env
-        echo "✅ Arquivo .env criado com sucesso."
-    else
-        echo "❌ Arquivo .env.example não encontrado. Criando arquivo .env básico..."
-        cat > .env << EOF
-# Configurações do servidor TESS-MCP
+if [ ! -f .env ]; then
+  echo -e "${YELLOW}Criando arquivo .env...${NC}"
+  cat > .env << EOF
+# Configuração do TESS-MCP Server
+# Preencha com suas credenciais e configurações
+
+# Chave de API TESS (obrigatória)
+TESS_API_KEY=sua_chave_api_aqui
+
+# URL da API TESS (opcional, valor padrão abaixo)
+TESS_API_URL=https://tess.pareto.io/api
+
+# Porta para o servidor MCP (opcional, padrão: 3001)
 PORT=3001
-
-# Chave de API do TESS (obrigatória)
-TESS_API_KEY=""
-
-# URL da API do TESS (opcional)
-TESS_API_URL="https://tess.pareto.io/api"
-
-# Configurações extras (opcionais)
-LOG_LEVEL="info"
 EOF
-        echo "✅ Arquivo .env básico criado."
-    fi
-    
-    echo ""
-    echo "⚠️ IMPORTANTE: Você precisa configurar sua TESS_API_KEY no arquivo .env"
-    echo "   Edite o arquivo .env antes de iniciar o servidor."
-    echo ""
+  echo -e "✅ Arquivo .env criado. Por favor, edite-o com suas credenciais."
+else
+  echo -e "✅ Arquivo .env já existe."
 fi
 
-# Verificar diretório public
-if [ ! -d "public" ]; then
-    echo "📁 Criando diretório public..."
-    mkdir -p public
-    
-    # Criar um arquivo HTML de exemplo
-    cat > public/index.html << EOF
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TESS-MCP Cliente</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            background: #f8f9fa;
-        }
-        h1 {
-            color: #333;
-            border-bottom: 2px solid #0066cc;
-            padding-bottom: 10px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        pre {
-            background: #f4f4f4;
-            padding: 10px;
-            border-radius: 4px;
-            overflow-x: auto;
-        }
-        button {
-            background: #0066cc;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #0055aa;
-        }
-        #output {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f8f8;
-            border-radius: 4px;
-            border-left: 4px solid #0066cc;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Cliente TESS-MCP</h1>
-        <p>Este é um cliente básico para testar o servidor TESS-MCP.</p>
-        
-        <h2>Ferramentas Disponíveis</h2>
-        <button id="listTools">Listar Ferramentas</button>
-        
-        <h2>Testar Execute Agent</h2>
-        <div>
-            <label for="agentId">ID do Agente:</label>
-            <input type="text" id="agentId" placeholder="Ex: 123">
-        </div>
-        <div>
-            <label for="inputText">Texto de Entrada:</label>
-            <textarea id="inputText" rows="4" placeholder="Digite o texto de entrada para o agente"></textarea>
-        </div>
-        <button id="executeAgent">Executar Agente</button>
-        
-        <div id="output">Os resultados aparecerão aqui...</div>
-    </div>
+# Instalar dependências
+echo -e "${YELLOW}Instalando dependências...${NC}"
+npm install
+if [ $? -eq 0 ]; then
+  echo -e "✅ Dependências instaladas com sucesso."
+else
+  echo -e "${RED}❌ Falha ao instalar dependências. Verifique os erros acima.${NC}"
+  exit 1
+fi
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        // Conectar ao WebSocket
-        const socket = io();
-        const output = document.getElementById('output');
-        
-        // Exibir mensagem quando conectado
-        socket.on('connect', () => {
-            output.innerHTML = '<p>Conectado ao servidor TESS-MCP</p>';
-        });
-        
-        // Botão para listar ferramentas
-        document.getElementById('listTools').addEventListener('click', () => {
-            output.innerHTML = '<p>Solicitando lista de ferramentas...</p>';
-            socket.emit('list_tools');
-        });
-        
-        // Receber lista de ferramentas
-        socket.on('tools_list', (data) => {
-            let html = '<h3>Ferramentas Disponíveis:</h3><ul>';
-            data.tools.forEach(tool => {
-                html += `<li><strong>${tool.name}</strong>: ${tool.description}</li>`;
-            });
-            html += '</ul>';
-            output.innerHTML = html;
-        });
-        
-        // Botão para executar agente
-        document.getElementById('executeAgent').addEventListener('click', () => {
-            const agentId = document.getElementById('agentId').value;
-            const inputText = document.getElementById('inputText').value;
-            
-            if (!agentId || !inputText) {
-                output.innerHTML = '<p style="color: red">Erro: ID do agente e texto de entrada são obrigatórios</p>';
-                return;
-            }
-            
-            output.innerHTML = '<p>Executando agente...</p>';
-            socket.emit('call_tool', {
-                name: 'tess.execute_agent',
-                arguments: {
-                    agent_id: agentId,
-                    input_text: inputText,
-                    wait_execution: false
-                }
-            });
-        });
-        
-        // Receber resultado da ferramenta
-        socket.on('tool_result', (data) => {
-            if (data.isError) {
-                output.innerHTML = `<p style="color: red">Erro: ${data.error}</p>`;
-            } else {
-                output.innerHTML = '<h3>Resultado:</h3><pre>' + JSON.stringify(data.result, null, 2) + '</pre>';
-            }
-        });
-        
-        // Receber atualizações de execução
-        socket.on('execution_update', (data) => {
-            const currentOutput = output.innerHTML;
-            output.innerHTML = currentOutput + '<p>Atualização: Status = ' + data.status + '</p>';
-        });
-        
-        // Receber conclusão de execução
-        socket.on('execution_complete', (data) => {
-            output.innerHTML = '<h3>Execução Concluída:</h3><pre>' + JSON.stringify(data.data, null, 2) + '</pre>';
-        });
-        
-        // Receber erros
-        socket.on('error', (data) => {
-            output.innerHTML = `<p style="color: red">Erro: ${data.message}</p>`;
-        });
-    </script>
-</body>
-</html>
-EOF
-    echo "✅ Página de exemplo criada em public/index.html."
+# Verificar instalação do Smithery CLI (opcional)
+echo -e "${YELLOW}Verificando Smithery CLI...${NC}"
+if command_exists smithery || npx @smithery/cli@latest --version >/dev/null 2>&1; then
+  echo -e "✅ Smithery CLI disponível."
+else
+  echo -e "${YELLOW}⚠️  Smithery CLI não encontrado. Instalando globalmente...${NC}"
+  npm install -g @smithery/cli
+  if [ $? -eq 0 ]; then
+    echo -e "✅ Smithery CLI instalado globalmente."
+  else
+    echo -e "${YELLOW}⚠️  Aviso: Smithery CLI não pôde ser instalado globalmente.${NC}"
+    echo -e "${YELLOW}   Você ainda pode usá-lo com 'npx @smithery/cli@latest'.${NC}"
+  fi
 fi
 
 # Tornar scripts executáveis
-echo "🔑 Tornando scripts executáveis..."
-chmod +x scripts/*.sh
+echo -e "${YELLOW}Tornando scripts executáveis...${NC}"
+chmod +x ./scripts/*.sh
+echo -e "✅ Scripts configurados."
 
-echo ""
-echo "======================================================"
-echo "✅ Configuração concluída com sucesso!"
-echo ""
-echo "Para iniciar o servidor, execute:"
-echo "  ./scripts/start.sh"
-echo ""
-echo "Para iniciar em modo produção (sem hot-reload):"
-echo "  ./scripts/start.sh --prod"
-echo "======================================================" 
+# Finalizar
+echo -e "${GREEN}Configuração concluída com sucesso!${NC}"
+echo -e "${BLUE}Para iniciar o servidor:${NC}"
+echo -e "  npm start         - Modo normal"
+echo -e "  npm run dev       - Modo desenvolvimento (com reinício automático)"
+echo -e "  npm run yolo      - Modo automático (sem confirmações)"
+echo -e ""
+echo -e "${BLUE}Para publicar no Smithery:${NC}"
+echo -e "  npm run smithery:build   - Preparar para publicação"
+echo -e "  npm run smithery:publish - Publicar no registro Smithery"
+echo -e ""
+echo -e "${YELLOW}IMPORTANTE: Não esqueça de editar o arquivo .env com sua chave de API TESS!${NC}"
