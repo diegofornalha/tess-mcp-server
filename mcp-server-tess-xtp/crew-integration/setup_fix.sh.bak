@@ -1,6 +1,4 @@
 #!/bin/bash
-# Adicionar pasta bin local ao PATH
-export PATH=$PATH:$PWD/bin
 
 echo "=== Configurando ambiente TESS-MCP com CrewAI (versão corrigida) ==="
 

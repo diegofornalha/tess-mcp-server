@@ -1,6 +1,28 @@
 {
+  "name": "@diegofornalha/crew-ai-tess-pareto",
+  "version": "1.0.0",
+  "description": "Integração TESS com Crew AI",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "tess",
+    "crew-ai",
+    "pareto",
+    "ai",
+    "mcp"
+  ],
+  "author": "Diego Fornalha",
+  "license": "MIT",
   "dependencies": {
     "@extism/extism": "^2.0.0-rc11",
-    "@modelcontextprotocol/sdk": "^1.8.0"
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "zod": "^3.24.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/diegofornalha/crew-ai-tess-pareto"
   }
 }

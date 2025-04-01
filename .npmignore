@@ -1,0 +1,50 @@
+# Arquivos e diretórios a serem ignorados ao publicar o pacote npm
+
+# Arquivos de sistema
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ambientes virtuais e caches
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+.env.example
+
+# Diretórios de desenvolvimento
+node_modules/
+.git/
+.github/
+debug/
+test/
+tests/
+
+# Arquivos de configuração específicos
+.gitignore
+.prettierrc
+.prettierignore
+.pylintrc
+
+# Documentação e arquivos de exemplo
+docs/
+arcee_chat.py
+run_arcee_chat.py
+
+# Arquivos de compilação
+dist/
+build/
+*.tgz
+*.tar.gz
+
+# Outros
+setup.py
+requirements.txt
+Cargo.toml
+Cargo.lock
+target/
+*.md
+!README.md 

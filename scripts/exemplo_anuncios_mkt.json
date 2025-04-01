@@ -1,0 +1,10 @@
+{
+  "nome-da-empresa": "Marketing Digital Pro",
+  "descrio": "Agência especializada em marketing digital com foco em resultados e ROI. Oferecemos serviços completos de SEO, redes sociais, Google Ads e marketing de conteúdo para pequenas e médias empresas que querem aumentar sua presença online e gerar mais leads qualificados.",
+  "diferenciais": "Estratégias personalizadas, métricas em tempo real, especialistas certificados em Google Ads e Meta, metodologia comprovada, atendimento personalizado, relatórios transparentes mensais, retorno sobre investimento garantido",
+  "call-to-action": "Agende uma consulta gratuita",
+  "temperature": "0.75",
+  "model": "gpt-4o",
+  "maxlength": 140,
+  "language": "Portuguese (Brazil)"
+} 

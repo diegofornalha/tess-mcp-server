@@ -1,226 +1,192 @@
-# Servidor TESS-MCP
+# TESS-MCP Server
 
-Este projeto implementa um servidor que expõe as funcionalidades da API TESS como ferramentas MCP (Model Context Protocol), permitindo que qualquer cliente MCP acesse os recursos do TESS.
+Servidor MCP para integração com a API TESS, permitindo utilizar agentes TESS através do protocolo MCP (Model Context Protocol).
 
-## Arquitetura
+## 📚 Sobre
 
-O sistema usa o protocolo MCP para padronizar a comunicação entre clientes de IA e serviços, como o TESS. Com este adaptador, qualquer cliente MCP pode acessar as funcionalidades do TESS através de uma interface padrão.
+TESS-MCP Server é um adaptador que permite utilizar os agentes TESS através do protocolo MCP, facilitando a integração com modelos de IA como GPT-4, Claude e outros que suportem o padrão MCP.
 
-```
-┌──────────────┐     ┌───────────────┐     ┌──────────────┐
-│  Cliente MCP  │────▶│ Servidor MCP  │────▶│  API TESS   │
-└──────────────┘     └───────────────┘     └──────────────┘
-                          ▲
-                          │
-                     ┌────────────┐
-                     │ TESS Tools │
-                     └────────────┘
-```
 
-## Modos de Uso
+## 🚀 Características
 
-O projeto oferece múltiplas formas de interação com o servidor TESS-MCP:
+- **Integração TESS-MCP**: Execução de agentes TESS via protocolo MCP
+- **Ferramentas disponíveis**:
+  - `tess.list_agents`: Lista os agentes disponíveis no TESS
+  - `tess.get_agent`: Obtém detalhes de um agente específico
+  - `tess.execute_agent`: Executa um agente TESS
+  - `tess.upload_file`: Faz upload de um arquivo para o TESS
+- **WebSocket**: Comunicação em tempo real para monitoramento de execuções
+- **Cliente de exemplo**: Interface web para testar as ferramentas
+- **Scripts utilitários**: Configuração, inicialização e demonstração
 
-### 1. API MCP Direta
+## 🔧 Instalação
 
-Acesse as ferramentas TESS diretamente através da API MCP usando qualquer cliente HTTP.
+### Pré-requisitos
 
-### 2. Interface Streamlit
+- Node.js 18 ou superior
+- NPM
+- Chave de API TESS válida
 
-Use a interface web Streamlit para interagir com as ferramentas TESS de forma visual e intuitiva.
+### Configuração
 
-### 3. Integração com CrewAI (Novo!)
-
-Utilize uma equipe de agentes inteligentes para orquestrar o uso das ferramentas TESS através do framework CrewAI.
-
-```
-┌──────────────┐     ┌───────────────┐     ┌───────────────┐     ┌──────────────┐
-│  Streamlit   │────▶│    CrewAI     │────▶│ Servidor MCP  │────▶│  API TESS   │
-└──────────────┘     └───────────────┘     └───────────────┘     └──────────────┘
-                          ▲
-                          │
-                     ┌────────────┐
-                     │   Agentes  │
-                     └────────────┘
+1. Clone o repositório:
+```bash
+git clone https://github.com/diegofornalha/mcp-server-tess-xtp.git
+cd mcp-server-tess-xtp
 ```
 
-## Requisitos
+2. Execute o script de configuração:
+```bash
+./scripts/setup.sh
+```
 
-- Node.js 16.x ou superior
-- Python 3.8 ou superior (para Streamlit e CrewAI)
-- Conta TESS com chave de API válida
+3. Configure sua API Key do TESS no arquivo `.env`:
+```
+TESS_API_KEY="sua_api_key_aqui"
+```
 
-## Configuração
+## 🖥️ Uso
 
-1. Clone este repositório
-2. Instale as dependências:
+### Iniciar o servidor
 
 ```bash
-npm install
+# Modo desenvolvimento (com hot-reload)
+./scripts/start.sh
+
+# Modo produção
+./scripts/start.sh --prod
 ```
 
-3. Crie um arquivo `.env` baseado no `.env.example`:
+### Testar a conexão
+
+Acesse [http://localhost:3001](http://localhost:3001) em seu navegador para abrir o cliente de demonstração.
+
+Ou verifique a saúde do servidor via terminal:
+```bash
+curl http://localhost:3001/health
+```
+
+### Demonstração de integração
+
+Execute a demonstração de integração para ver como utilizar o TESS-MCP em uma aplicação:
 
 ```bash
-cp .env.example .env
+./scripts/run-integration.sh
 ```
 
-4. Edite o arquivo `.env` e adicione sua chave API TESS:
+## 🧩 Integração com MCP
 
+### Listar ferramentas
+
+```js
+const response = await fetch('http://localhost:3001/tools/list', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({})
+});
+
+const tools = await response.json();
+console.log(tools);
 ```
-TESS_API_KEY=sua_chave_api_tess_aqui
+
+### Chamar uma ferramenta
+
+```js
+const response = await fetch('http://localhost:3001/tools/call', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    name: 'tess.execute_agent',
+    arguments: {
+      agent_id: '123',
+      input_text: 'Olá, TESS!'
+    }
+  })
+});
+
+const result = await response.json();
+console.log(result);
 ```
 
-## Uso
+## 📋 API MCP
 
-### Iniciando o servidor
+O TESS-MCP Server expõe os seguintes endpoints MCP:
 
-Para iniciar o servidor MCP:
+| Endpoint | Método | Descrição |
+|----------|--------|-----------|
+| `/tools/list` | POST | Lista as ferramentas disponíveis |
+| `/tools/call` | POST | Executa uma ferramenta |
+| `/health` | GET | Verifica o status do servidor |
+
+## 📘 Comparação com DesktopCommanderMCP
+
+O TESS-MCP Server foi aprimorado com inspiração no DesktopCommanderMCP, aplicando as seguintes melhorias:
+
+- **Estrutura organizada**: Separação clara de responsabilidades em módulos
+- **Scripts confiáveis**: Scripts de configuração e inicialização inspirados no DesktopCommanderMCP
+- **Documentação detalhada**: Instruções claras de instalação, uso e integração
+- **Cliente de demonstração**: Interface web para testar a API
+- **Exemplo de integração**: Código JavaScript demonstrando o uso em aplicações
+
+## 📦 Publicação e Distribuição
+
+### Publicar no GitHub
+
+Para publicar este projeto no GitHub:
+
+1. Crie um novo repositório em [GitHub](https://github.com/new)
+2. Inicialize o Git e envie para o GitHub:
 
 ```bash
-npm start
+git init
+git add .
+git commit -m "Versão inicial do servidor TESS-MCP"
+git branch -M main
+git remote add origin https://github.com/seu-usuario/mcp-server-tess-xtp.git
+git push -u origin main
 ```
 
-O servidor estará disponível na porta especificada (padrão: 3001).
+### Publicar no Smithery
 
-### Desenvolvimento
+Este projeto está configurado para ser publicado na plataforma Smithery, permitindo que outros usuários utilizem o servidor TESS-MCP facilmente.
 
-Para execução com reload automático durante desenvolvimento:
-
+1. Gere o arquivo de configuração do Smithery:
 ```bash
-npm run dev
+npm run smithery:build
 ```
 
-### Usando a Integração CrewAI
-
-A integração com CrewAI permite utilizar agentes inteligentes para orquestrar o uso das ferramentas TESS:
-
+2. Faça login no Smithery CLI:
 ```bash
-cd crew-integration
-./setup.sh
+npx @smithery/cli@latest login
 ```
 
-Consulte o [README da integração CrewAI](./crew-integration/README.md) para mais detalhes.
-
-## Ferramentas TESS disponíveis via MCP
-
-O servidor expõe as seguintes ferramentas MCP:
-
-### 📋 tess.list_agents
-
-Lista os agentes disponíveis no TESS.
-
-**Parâmetros:**
-- `page` (número, opcional): Página para paginação (padrão: 1)
-- `per_page` (número, opcional): Itens por página (padrão: 15)
-- `type` (string, opcional): Filtrar por tipo de agente
-- `q` (string, opcional): Termo de busca
-
-**Exemplo:**
-```json
-{
-  "name": "tess.list_agents",
-  "arguments": {
-    "page": 1,
-    "per_page": 10,
-    "type": "chat"
-  }
-}
+3. Publique o projeto:
+```bash
+npm run smithery:publish
 ```
 
-### 🔍 tess.get_agent
-
-Obtém detalhes de um agente específico no TESS.
-
-**Parâmetros:**
-- `agent_id` (string, obrigatório): ID do agente
-
-**Exemplo:**
-```json
-{
-  "name": "tess.get_agent",
-  "arguments": {
-    "agent_id": "abc123"
-  }
-}
+4. Após a publicação, usuários poderão instalar o servidor com:
+```bash
+npx -y @smithery/cli@latest install @seu-usuario/mcp-server-tess-xtp --client claude --config '{"TESS_API_KEY":"sua_chave_api"}'
 ```
 
-### ▶️ tess.execute_agent
-
-Executa um agente específico no TESS.
-
-**Parâmetros:**
-- `agent_id` (string, obrigatório): ID do agente a ser executado
-- `input_text` (string, obrigatório): Texto de entrada para o agente
-- `temperature` (string, opcional): Temperatura para geração (de 0 a 1) (padrão: "1")
-- `model` (string, opcional): Modelo a ser usado (padrão: "tess-ai-light")
-- `file_ids` (array, opcional): IDs de arquivos a serem usados
-- `wait_execution` (boolean, opcional): Aguardar conclusão da execução (padrão: false)
-
-**Exemplo:**
-```json
-{
-  "name": "tess.execute_agent",
-  "arguments": {
-    "agent_id": "abc123",
-    "input_text": "Como posso ajudá-lo hoje?",
-    "temperature": "0.7",
-    "wait_execution": true
-  }
-}
+5. Para testar localmente antes de publicar:
+```bash
+npx @smithery/cli@latest run .
 ```
 
-### 📤 tess.upload_file
+## 🔒 Segurança
 
-Faz upload de um arquivo para o TESS.
+- Proteja sua API Key do TESS
+- Configure corretamente as origins CORS em ambiente de produção
+- Limite o acesso ao servidor em ambientes de produção
 
-**Parâmetros:**
-- `file_path` (string, obrigatório): Caminho do arquivo a ser enviado
-- `process` (boolean, opcional): Se o arquivo deve ser processado após o upload (padrão: false)
+## 📄 Licença
 
-**Exemplo:**
-```json
-{
-  "name": "tess.upload_file",
-  "arguments": {
-    "file_path": "/caminho/para/arquivo.pdf",
-    "process": true
-  }
-}
-```
+Este projeto é licenciado sob a [Licença MIT](LICENSE).
 
-## Integração com Clientes MCP
+## 🙏 Agradecimentos
 
-Este servidor pode ser acessado por qualquer cliente que implemente o protocolo MCP. Para interagir com o servidor:
-
-1. **Listar Ferramentas Disponíveis**
-   ```
-   POST http://localhost:3000/tools/list
-   ```
-
-2. **Executar uma Ferramenta**
-   ```
-   POST http://localhost:3000/tools/call
-   Content-Type: application/json
-   
-   {
-     "name": "tess.list_agents",
-     "arguments": {}
-   }
-   ```
-
-## Considerações de Segurança
-
-- Use HTTPS em produção
-- Não compartilhe sua chave API TESS
-- Considere implementar autenticação para o servidor MCP em ambientes de produção
-
-## Solução de Problemas
-
-- Se encontrar erros de autenticação, verifique se sua chave API TESS é válida
-- Para problemas com a API TESS, verifique o status do serviço
-- Logs detalhados podem ser ativados definindo `LOG_LEVEL=debug` no arquivo `.env`
-
-## Licença
-
-MIT 
+- [DesktopCommanderMCP](https://github.com/wonderwhy-er/DesktopCommanderMCP) por fornecer inspiração para a estrutura e scripts
+- [TESS API](https://tess.pareto.io) por fornecer a plataforma de agentes AI
+- [Model Context Protocol](https://modelcontextprotocol.github.io) por estabelecer o padrão de comunicação entre ferramentas e modelos 

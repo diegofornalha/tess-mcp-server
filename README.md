@@ -10,24 +10,28 @@ Esta CLI **não reimplementa** os serviços que integra, mas serve como uma cama
 2. Padronização de interfaces para facilitar o uso
 3. Adição de funcionalidades específicas à CLI sem modificar as APIs subjacentes
 
+## Arquitetura de Componentes
 
-## Sobre o MCP
+### MCP (Model Context Protocol)
 
-O MCP (Model Context Protocol) é um protocolo padronizado que facilita a comunicação entre modelos de linguagem e ferramentas externas. Este projeto utiliza o SDK oficial do MCP (@sdk-mcp) para implementar essa comunicação, sem modificar ou reimplementar o protocolo.
+O MCP é um protocolo padronizado que facilita a comunicação entre modelos de linguagem e ferramentas externas. Este projeto utiliza o SDK oficial do MCP (@sdk-mcp) para implementar essa comunicação, sem modificar ou reimplementar o protocolo.
 
-## Sobre o TESS
+### Servidor TESS-MCP
 
-O TESS (Tool Execution Subsystem) é uma plataforma que orquestra e gerencia ferramentas que podem ser utilizadas por modelos de IA. Este projeto consome a API oficial do TESS para:
+O servidor TESS-MCP é o componente responsável por implementar a integração entre o TESS (Tool Execution Subsystem) e o MCP. Este servidor:
 
-- Listar e executar agentes de IA
-- Fazer upload e gerenciar arquivos
-- Interagir com modelos de linguagem como o "tess-ai-light"
+- Orquestra e gerencia ferramentas que podem ser utilizadas por modelos de IA
+- Expõe APIs para listar e executar agentes de IA
+- Gerencia upload e organização de arquivos
+- Permite interação com modelos de linguagem como o "tess-ai-light"
 
 O TESS trabalha em conjunto com o MCP, permitindo que modelos solicitem e utilizem ferramentas de forma padronizada.
 
-Para mais informações, consulte a [documentação oficial da API TESS](https://docs.tess.pareto.io/api/introduction).
+### CLI (Interface de Linha de Comando)
 
-## Sobre o Arcee AI
+A CLI **consome** as APIs do servidor TESS-MCP, Arcee AI e MCP, fornecendo uma interface unificada para o usuário final. Ela não reimplementa essas funcionalidades, apenas oferece uma forma padronizada de acessá-las.
+
+### Arcee AI
 
 O Arcee AI é uma plataforma completa de IA que inclui:
 
@@ -35,7 +39,7 @@ O Arcee AI é uma plataforma completa de IA que inclui:
 - **Arcee Conductor**: roteador inteligente que seleciona o modelo mais adequado e eficiente em custo para cada prompt
 - **Small Language Models (SLMs)**: modelos de linguagem otimizados para tarefas específicas
 
-Este projeto utiliza a API oficial do Arcee AI para geração de conteúdo e funcionalidades de chat, sem reimplementar esses serviços.
+Para mais informações sobre TESS, consulte a [documentação oficial da API TESS](https://docs.tess.pareto.io/api/introduction).
 
 ## Arquitetura do Projeto
 
@@ -102,27 +106,21 @@ Nosso foco é manter adaptadores eficientes através de:
 - Cobertura adequada de testes
 - Documentação das responsabilidades de cada adaptador
 
-## Funcionalidades
+## Funcionalidades da CLI
 
-### Integração com Model Context Protocol
+A CLI fornece acesso unificado aos seguintes serviços:
 
-A CLI permite interagir com o protocolo MCP através do SDK oficial (@sdk-mcp):
+### MCP e TESS
+
+A CLI consome as APIs do servidor TESS-MCP, permitindo:
 
 - Listar todas as ferramentas disponíveis
 - Buscar ferramentas específicas
-- Obter detalhes de uma ferramenta
-- Executar ferramentas com parâmetros
-
-### Integração com TESS
-
-A CLI permite interagir com a API do TESS:
-
-- Listar agentes disponíveis
-- Obter detalhes de um agente
-- Executar agentes com mensagens personalizadas
+- Obter detalhes de ferramentas e agentes
+- Executar ferramentas e agentes com parâmetros
 - Fazer upload de arquivos para uso com agentes
 
-### Integração com Arcee AI
+### Arcee AI
 
 A CLI permite interagir com a API do Arcee AI:
 
@@ -140,7 +138,7 @@ arcee mcp-tools buscar "processamento"
 arcee mcp-tools detalhes tool1
 arcee mcp-tools executar tool1 '{"param1": "valor1"}'
 
-# API TESS
+# Servidor TESS-MCP
 arcee tess listar
 arcee tess executar agent123 "Como posso otimizar este código?"
 
@@ -182,4 +180,18 @@ Para desenvolver novos recursos de integração:
 4. Implemente clientes/adaptadores na infraestrutura (`infrastructure`) para comunicação com APIs externas
 5. Exponha funcionalidades via CLI (`src/commands`)
 
-Este fluxo de desenvolvimento garante uma separação clara entre o código do projeto e as APIs externas integradas. 
+Este fluxo de desenvolvimento garante uma separação clara entre o código do projeto e as APIs externas integradas.
+
+## Novidades
+
+### 25/03/2024
+
+- **Novo script para interação direta com API TESS**: Implementado o script `tess_api_cli.py` que permite listar, consultar e executar agentes TESS diretamente, sem depender do comando `test_api_tess`.
+- **Suporte a múltiplos modelos de linguagem**: O script suporta diversos modelos de linguagem, incluindo GPT-4o e Claude 3.5 Sonnet.
+- **Exemplos práticos para geração de anúncios**: Adicionados exemplos para cafeteria, agência de marketing digital e corretora de seguros.
+- **Documentação detalhada**: Criados guias de integração e dicas avançadas para otimização de anúncios Google Ads usando a API TESS.
+
+### 20/03/2024
+
+- **Interface Streamlit simplificada**: Removidas as abas superiores desnecessárias, mantendo apenas "Arcee CLI" e "Ajuda".
+- **Correção de bugs no adaptador TESS**: Resolvidos problemas na comunicação com a API TESS. 

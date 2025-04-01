@@ -105,6 +105,7 @@ def process_arguments(form_values, parameters):
 
 # Interface principal
 st.markdown("<h1 class='main-header'>TESS-MCP Interface</h1>", unsafe_allow_html=True)
+st.markdown("Esta interface conecta-se diretamente ao servidor TESS-MCP e utiliza apenas ferramentas TESS. Para interação com modelos de linguagem como Arcee ou OpenAI, utilize a interface CrewAI.")
 
 # Verificar estado do servidor
 server_status = check_server_status()

@@ -26,52 +26,225 @@ logger = logging.getLogger(__name__)
 # Carregar variáveis de ambiente
 load_dotenv()
 
-# Verificar se arcee está instalado
+# Função para verificar se Arcee CLI está instalado
 def check_arcee_installed() -> bool:
+    """Verifica se a CLI do Arcee está instalada no sistema ou em locais específicos conhecidos"""
+    # Verificar no PATH padrão
     try:
-        result = subprocess.run(['arcee', '--version'], 
-                               stdout=subprocess.PIPE, 
-                               stderr=subprocess.PIPE, 
-                               text=True)
-        return result.returncode == 0
-    except Exception:
-        return False
+        result = subprocess.run(['which', 'arcee'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode == 0:
+            logger.info(f"CLI Arcee encontrada em: {result.stdout.strip()}")
+            return True
+    except Exception as e:
+        logger.warning(f"Erro ao verificar Arcee no PATH: {e}")
+    
+    # Verificar em localizações conhecidas
+    possible_locations = [
+        '/Users/agents/Desktop/studio/MCP-CLI-TESS/arcee_cli/venv/bin/arcee'
+    ]
+    
+    for location in possible_locations:
+        if os.path.exists(location) and os.access(location, os.X_OK):
+            logger.info(f"CLI Arcee encontrada em localização alternativa: {location}")
+            # Adicionar a localização ao PATH para uso futuro
+            os.environ["PATH"] = os.environ["PATH"] + os.pathsep + os.path.dirname(location)
+            return True
+    
+    return False
+
+# Função para verificar se Arcee CLI está instalado
+def check_arcee_installed() -> tuple:
+    """Verifica se a CLI do Arcee está instalada no sistema ou em locais específicos conhecidos
+    
+    Returns:
+        tuple: (cli_available, arcee_path)
+    """
+    # Verificar no PATH padrão
+    try:
+        result = subprocess.run(['which', 'arcee'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode == 0:
+            arcee_path = result.stdout.strip()
+            logger.info(f"CLI Arcee encontrada em: {arcee_path}")
+            return True, arcee_path
+    except Exception as e:
+        logger.warning(f"Erro ao verificar Arcee no PATH: {e}")
+    
+    # Verificar em localizações conhecidas
+    possible_locations = [
+        '/Users/agents/Desktop/studio/MCP-CLI-TESS/arcee_cli/venv/bin/arcee'
+    ]
+    
+    for location in possible_locations:
+        if os.path.exists(location) and os.access(location, os.X_OK):
+            logger.info(f"CLI Arcee encontrada em localização alternativa: {location}")
+            # Adicionar a localização ao PATH para uso futuro
+            os.environ["PATH"] = os.environ["PATH"] + os.pathsep + os.path.dirname(location)
+            return True, location
+    
+    return False, None
 
 class ArceeChatProvider:
     """
     Provedor de chat usando a CLI do Arcee
     """
     def __init__(self):
-        self.available = check_arcee_installed()
-        if not self.available:
-            logger.warning("CLI Arcee não está instalada. Instale com 'pip install arcee-cli'")
+        self.api_key = os.getenv("ARCEE_API_KEY")
+        self.model = os.getenv("ARCEE_MODEL", "auto")
+        self.available = self.api_key is not None and len(self.api_key) > 0
+        self.last_model_used = None
+        
+        # Verifique se CLI arcee está instalada como backup
+        self.cli_available, self.arcee_path = check_arcee_installed()
+        
+        if not self.available and not self.cli_available:
+            logger.warning("ARCEE_API_KEY não está configurada e CLI Arcee não está instalada.")
+        elif not self.available:
+            logger.warning("ARCEE_API_KEY não está configurada, mas CLI Arcee está disponível como backup.")
+            logger.info(f"CLI Arcee encontrada em: {self.arcee_path}")
+        elif not self.cli_available:
+            logger.warning("CLI Arcee não está instalada, usando apenas ARCEE_API_KEY.")
     
     def is_available(self) -> bool:
-        return self.available
+        return self.available or self.cli_available
     
-    def chat(self, messages: List[Dict[str, str]]) -> str:
+    def get_last_model(self) -> str:
+        """Retorna o último modelo usado"""
+        return self.last_model_used or "desconhecido"
+    
+    def chat(self, messages: List[Dict[str, str]]) -> Dict[str, str]:
         """
-        Envia uma lista de mensagens para o Arcee e retorna a resposta
+        Envia uma lista de mensagens para o Arcee e retorna a resposta e informações do modelo
         """
-        if not self.available:
-            return "Erro: CLI Arcee não está instalada. Instale com 'pip install arcee-cli'"
+        if not self.is_available():
+            return {
+                "content": "Erro: Nem ARCEE_API_KEY está configurada, nem CLI Arcee está instalada.",
+                "model": "nenhum"
+            }
         
+        # Encontrar o comando arcee
+        arcee_cmd = 'arcee'
+        arcee_path = None
+        
+        # Verificar se o arcee está no caminho alternativo
+        possible_locations = [
+            '/Users/agents/Desktop/studio/MCP-CLI-TESS/arcee_cli/venv/bin/arcee'
+        ]
+        
+        for location in possible_locations:
+            if os.path.exists(location) and os.access(location, os.X_OK):
+                arcee_path = location
+                arcee_cmd = arcee_path
+                logger.info(f"Usando Arcee CLI de localização alternativa: {arcee_path}")
+                break
+        
+        # Primeiro tente usar a API key se estiver disponível
+        if self.available:
+            try:
+                # Definir variáveis de ambiente temporariamente para arcee CLI usar a chave API configurada
+                original_env = os.environ.copy()
+                os.environ["ARCEE_API_KEY"] = self.api_key
+                if self.model != "auto":
+                    os.environ["ARCEE_MODEL"] = self.model
+                
+                # Prepare o input para o comando arcee
+                arcee_input = json.dumps(messages)
+                
+                # Execute o comando arcee chat
+                logger.info(f"Executando comando: {arcee_cmd} chat")
+                result = subprocess.run([arcee_cmd, 'chat'], 
+                                      input=arcee_input, 
+                                      text=True, 
+                                      stdout=subprocess.PIPE, 
+                                      stderr=subprocess.PIPE)
+                
+                # Restaurar variáveis de ambiente originais
+                os.environ.clear()
+                os.environ.update(original_env)
+                
+                # Captura o modelo usado do stderr ou stdout
+                model_used = "desconhecido"
+                model_match = re.search(r'modelo: ([a-zA-Z0-9-]+)', result.stderr)
+                if model_match:
+                    model_used = model_match.group(1)
+                else:
+                    model_match = re.search(r'modelo: ([a-zA-Z0-9-]+)', result.stdout)
+                    if model_match:
+                        model_used = model_match.group(1)
+                
+                self.last_model_used = model_used
+                logger.info(f"Arcee usando modelo: {model_used}")
+                
+                if result.returncode != 0:
+                    raise Exception(f"Erro ao executar arcee chat: {result.stderr}")
+                
+                return {
+                    "content": result.stdout.strip(),
+                    "model": model_used
+                }
+            except Exception as e:
+                logger.error(f"Erro ao usar Arcee com API key: {str(e)}")
+                # Se falhar com a API key mas tiver CLI disponível, tente usar CLI diretamente
+                if self.cli_available:
+                    logger.info("Tentando fallback para CLI Arcee local")
+                    return self._use_cli_arcee(messages, arcee_cmd)
+                return {
+                    "content": f"Erro ao usar Arcee com API key: {str(e)}",
+                    "model": "erro"
+                }
+        # Se não tiver API key mas tiver CLI instalada, use CLI diretamente
+        elif self.cli_available:
+            return self._use_cli_arcee(messages, arcee_cmd)
+        
+        # Não deveria chegar aqui, mas por segurança
+        return {
+            "content": "Erro: Configuração do Arcee inválida.",
+            "model": "nenhum"
+        }
+    
+    def _use_cli_arcee(self, messages: List[Dict[str, str]], arcee_cmd: str = 'arcee') -> Dict[str, str]:
+        """Usa a CLI do Arcee instalada localmente"""
         try:
+            # Prepare o input para o comando arcee
             arcee_input = json.dumps(messages)
-            result = subprocess.run(['arcee', 'chat'], 
+            
+            # Execute o comando arcee chat
+            logger.info(f"Executando comando CLI local: {arcee_cmd} chat")
+            result = subprocess.run([arcee_cmd, 'chat'], 
                                    input=arcee_input, 
                                    text=True, 
                                    stdout=subprocess.PIPE, 
                                    stderr=subprocess.PIPE)
             
-            if result.returncode != 0:
-                logger.error(f"Erro ao executar arcee chat: {result.stderr}")
-                return f"Erro ao executar arcee chat: {result.stderr}"
+            # Captura o modelo usado do stderr ou stdout
+            model_used = "desconhecido"
+            model_match = re.search(r'modelo: ([a-zA-Z0-9-]+)', result.stderr)
+            if model_match:
+                model_used = model_match.group(1)
+            else:
+                model_match = re.search(r'modelo: ([a-zA-Z0-9-]+)', result.stdout)
+                if model_match:
+                    model_used = model_match.group(1)
             
-            return result.stdout.strip()
+            self.last_model_used = model_used
+            logger.info(f"CLI Arcee usando modelo: {model_used}")
+            
+            if result.returncode != 0:
+                logger.error(f"Erro ao executar arcee chat via CLI: {result.stderr}")
+                return {
+                    "content": f"Erro ao executar arcee chat via CLI: {result.stderr}",
+                    "model": model_used
+                }
+            
+            return {
+                "content": result.stdout.strip(),
+                "model": model_used
+            }
         except Exception as e:
-            logger.error(f"Erro ao executar arcee chat: {str(e)}")
-            return f"Erro ao executar arcee chat: {str(e)}"
+            logger.error(f"Erro ao executar arcee chat via CLI: {str(e)}")
+            return {
+                "content": f"Erro ao executar arcee chat via CLI: {str(e)}",
+                "model": "erro"
+            }
 
 class OpenAIChatProvider:
     """
@@ -80,28 +253,37 @@ class OpenAIChatProvider:
     def __init__(self):
         self.api_key = os.getenv("OPENAI_API_KEY")
         self.available = self.api_key is not None and len(self.api_key) > 0
+        self.last_model_used = None
         if not self.available:
             logger.warning("OPENAI_API_KEY não está configurada.")
     
     def is_available(self) -> bool:
         return self.available
     
-    def chat(self, messages: List[Dict[str, str]]) -> str:
+    def get_last_model(self) -> str:
+        """Retorna o último modelo usado"""
+        return self.last_model_used or "desconhecido"
+    
+    def chat(self, messages: List[Dict[str, str]]) -> Dict[str, str]:
         """
-        Envia uma lista de mensagens para a OpenAI e retorna a resposta
+        Envia uma lista de mensagens para a OpenAI e retorna a resposta e informações do modelo
         """
         if not self.available:
-            return "Erro: OPENAI_API_KEY não está configurada."
+            return {
+                "content": "Erro: OPENAI_API_KEY não está configurada.",
+                "model": "nenhum"
+            }
         
         try:
             # Use a API da OpenAI
+            model = os.getenv("OPENAI_MODEL", "gpt-4o")
             url = "https://api.openai.com/v1/chat/completions"
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.api_key}"
             }
             data = {
-                "model": os.getenv("OPENAI_MODEL", "gpt-4o"),
+                "model": model,
                 "messages": messages
             }
             
@@ -109,10 +291,109 @@ class OpenAIChatProvider:
             response.raise_for_status()
             result = response.json()
             
-            return result["choices"][0]["message"]["content"]
+            # Capturar o modelo usado (pode ser diferente se a API fizer fallback)
+            self.last_model_used = result.get("model", model)
+            logger.info(f"OpenAI usando modelo: {self.last_model_used}")
+            
+            return {
+                "content": result["choices"][0]["message"]["content"],
+                "model": self.last_model_used
+            }
         except Exception as e:
             logger.error(f"Erro ao usar a API da OpenAI: {str(e)}")
-            return f"Erro ao usar a API da OpenAI: {str(e)}"
+            return {
+                "content": f"Erro ao usar a API da OpenAI: {str(e)}",
+                "model": "erro"
+            }
+
+class TessOpenAICompatibleProvider:
+    """
+    Provedor de chat usando a API compatível com OpenAI do TESS
+    """
+    def __init__(self):
+        self.tess_api_key = os.getenv("TESS_API_KEY")
+        self.tess_api_url = os.getenv("TESS_API_URL", "https://tess.pareto.io/api")
+        self.agent_id = os.getenv("TESS_AGENT_ID", "8794")  # ID do agente TESS AI Docs Helper como padrão
+        self.available = self.tess_api_key is not None and len(self.tess_api_key) > 0
+        self.last_model_used = None
+        
+        if not self.available:
+            logger.warning("TESS_API_KEY não está configurada.")
+        else:
+            logger.info(f"TESS configurado com API URL: {self.tess_api_url} e Agent ID: {self.agent_id}")
+    
+    def is_available(self) -> bool:
+        return self.available
+    
+    def get_last_model(self) -> str:
+        """Retorna o último modelo usado"""
+        return self.last_model_used or "desconhecido"
+    
+    def chat(self, messages: List[Dict[str, str]]) -> Dict[str, str]:
+        """
+        Envia uma lista de mensagens para o TESS usando a API compatível com OpenAI
+        """
+        if not self.available:
+            return {
+                "content": "Erro: TESS_API_KEY não está configurada.",
+                "model": "nenhum"
+            }
+        
+        try:
+            # Usar a API do TESS compatível com OpenAI
+            model = os.getenv("OPENAI_MODEL", "gpt-4o")
+            temperature = float(os.getenv("TEMPERATURE", "0.7"))
+            
+            # Construir a URL para a API compatível com OpenAI do TESS
+            url = f"{self.tess_api_url}/agents/{self.agent_id}/openai/chat/completions"
+            
+            logger.info(f"Fazendo requisição para: {url}")
+            logger.info(f"Usando modelo: {model}, temperatura: {temperature}")
+            
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.tess_api_key}"
+            }
+            
+            data = {
+                "model": model,
+                "messages": messages,
+                "temperature": str(temperature),
+                "tools": "no-tools",
+                "stream": False
+            }
+            
+            # Log para debug
+            debug_data = data.copy()
+            if len(messages) > 0 and 'content' in messages[0]:
+                debug_data['messages'][0]['content'] = messages[0]['content'][:50] + '...' if len(messages[0]['content']) > 50 else messages[0]['content']
+            logger.info(f"Enviando dados: {debug_data}")
+            
+            response = requests.post(url, headers=headers, json=data)
+            response.raise_for_status()
+            result = response.json()
+            
+            # Capturar o modelo usado
+            self.last_model_used = result.get("model", model)
+            logger.info(f"TESS usando modelo: {self.last_model_used}")
+            
+            return {
+                "content": result["choices"][0]["message"]["content"],
+                "model": self.last_model_used
+            }
+        except Exception as e:
+            logger.error(f"Erro ao usar a API do TESS: {str(e)}")
+            
+            # Se disponível, tentar fallback para Arcee
+            arcee_provider = ArceeChatProvider()
+            if arcee_provider.is_available():
+                logger.info("Falha no TESS, tentando fallback para Arcee")
+                return arcee_provider.chat(messages)
+            
+            return {
+                "content": f"Erro ao usar a API do TESS: {str(e)}. E o Arcee não está disponível como fallback.",
+                "model": "erro"
+            }
 
 class MCPTessTool:
     """
@@ -234,16 +515,25 @@ class TessCrew:
     """
     def __init__(self):
         self.mcp_base_url = os.getenv("MCP_TESS_HOST", "http://localhost:3001")
-        self.llm_provider = os.getenv("LLM_PROVIDER", "openai")
+        self.llm_provider = os.getenv("LLM_PROVIDER", "tess")
         self.debug = os.getenv("DEBUG", "False").lower() == "true"
         
         # Inicializar provedores de chat
         self.arcee_provider = ArceeChatProvider()
+        self.tess_provider = TessOpenAICompatibleProvider()
         self.openai_provider = OpenAIChatProvider()
         
-        # Selecionar provedor conforme configuração
-        self.chat_provider = self.arcee_provider if self.arcee_provider.is_available() else self.openai_provider
-        llm_provider_name = "arcee" if self.arcee_provider.is_available() else "openai"
+        # Selecionar provedor conforme configuração e disponibilidade
+        if self.tess_provider.is_available():
+            self.chat_provider = self.tess_provider
+            llm_provider_name = "tess"
+        elif self.arcee_provider.is_available():
+            self.chat_provider = self.arcee_provider
+            llm_provider_name = "arcee"
+        else:
+            self.chat_provider = self.openai_provider
+            llm_provider_name = "openai"
+            
         logger.info(f"Usando provedor LLM: {llm_provider_name}")
         
         # Carregar ferramentas TESS simuladas
@@ -622,6 +912,76 @@ class TessCrew:
                 {"role": "user", "content": f"Faça uma análise profunda do seguinte texto{f' com foco em {focus}' if focus else ''}: {text}"}
             ]
             return self.chat_provider.chat(messages)
+
+    def execute_single_query(self, query: str, model: str = None, temperature: float = None) -> Dict[str, Any]:
+        """
+        Executa uma única consulta usando o provedor de chat configurado
+        
+        Args:
+            query: A consulta do usuário
+            model: Nome do modelo a ser usado (opcional)
+            temperature: Temperatura para geração (opcional)
+        """
+        logger.info(f"Executando consulta: {query}")
+        logger.info(f"Modelo solicitado: {model}")
+        logger.info(f"Temperatura solicitada: {temperature}")
+        
+        # Se o modelo for especificado e não for "auto", configurá-lo temporariamente
+        original_model = None
+        if model and model.lower() != "auto":
+            # Salvar o valor atual de OPENAI_MODEL
+            original_model = os.getenv("OPENAI_MODEL")
+            # Configurar o novo modelo
+            os.environ["OPENAI_MODEL"] = model
+            logger.info(f"Modelo temporário configurado: {model}")
+        elif model and model.lower() == "auto":
+            logger.info("Modo 'auto' selecionado. O sistema escolherá o melhor modelo disponível.")
+            # Não alteramos a variável de ambiente neste caso
+            # O provedor usará seu modelo padrão ou fará a melhor escolha
+        
+        # Se a temperatura for especificada, configurá-la temporariamente
+        original_temp = None
+        if temperature is not None:
+            # Salvar o valor atual de TEMPERATURE
+            original_temp = os.getenv("TEMPERATURE")
+            # Configurar a nova temperatura
+            os.environ["TEMPERATURE"] = str(temperature)
+            logger.info(f"Temperatura temporária configurada: {temperature}")
+        
+        try:
+            # Formatar a mensagem para o provedor de chat
+            messages = [{"role": "user", "content": query}]
+            
+            # Chamar o provedor de chat atual
+            chat_response = self.chat_provider.chat(messages)
+            
+            # Obter informações sobre o modelo usado
+            model_used = "desconhecido"
+            response_text = ""
+            
+            if isinstance(chat_response, dict):
+                model_used = chat_response.get("model", "desconhecido")
+                response_text = chat_response.get("content", "")
+            else:
+                # Para compatibilidade com versões anteriores
+                response_text = chat_response
+            
+            # Logar o modelo usado
+            logger.info(f"Consulta respondida usando modelo: {model_used}")
+            
+            # Retornar o resultado com informações do modelo
+            return {
+                "query": query,
+                "response": response_text,
+                "model": model_used,
+                "timestamp": time.time()
+            }
+        finally:
+            # Restaurar as configurações originais
+            if original_model is not None:
+                os.environ["OPENAI_MODEL"] = original_model
+            if original_temp is not None:
+                os.environ["TEMPERATURE"] = original_temp
 
 # Exemplo de uso direto (para teste)
 if __name__ == "__main__":
