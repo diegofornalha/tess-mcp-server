@@ -25,7 +25,7 @@ module.exports = {
    * Caminho para o diretório do servidor MCP
    */
   getServerPath: () => {
-    return path.resolve(__dirname, '..', 'mcp-server-tess-xtp');
+    return path.resolve(__dirname, '..', 'mcp-server-tess');
   },
 
   /**

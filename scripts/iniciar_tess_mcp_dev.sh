@@ -23,7 +23,7 @@ get_project_root() {
 
 PROJECT_ROOT=$(get_project_root)
 # Diretório do servidor - suporta caminho fixo ou relativo
-SERVIDOR_DIR="${PROJECT_ROOT}/mcp-server-tess-xtp"
+SERVIDOR_DIR="${PROJECT_ROOT}/mcp-server-tess"
 
 # Verifica se o diretório existe
 if [ ! -d "$SERVIDOR_DIR" ]; then

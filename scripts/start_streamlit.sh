@@ -13,7 +13,7 @@ NC='\033[0m' # No Color
 echo -e "${BLUE}🚀 Iniciando aplicação Streamlit do Crew Integration...${NC}"
 
 # Diretório da aplicação
-APP_DIR="/Users/agents/Desktop/crew_ai_tess_pareto/mcp-server-tess-xtp/crew-integration"
+APP_DIR="/Users/agents/Desktop/crew_ai_tess_pareto/mcp-server-tess/crew-integration"
 
 # Verifica se o diretório existe
 if [ ! -d "$APP_DIR" ]; then

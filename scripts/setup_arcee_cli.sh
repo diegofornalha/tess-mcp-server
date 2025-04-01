@@ -31,7 +31,7 @@ if [ ! -f "$ARCEE_PATH" ]; then
 fi
 
 # Criar um arquivo .env para armazenar as variáveis de ambiente
-ENV_FILE="mcp-server-tess-xtp/crew-integration/.env"
+ENV_FILE="mcp-server-tess/crew-integration/.env"
 
 # Verificar se já existe uma API key do Arcee no arquivo .env
 if grep -q "ARCEE_API_KEY" "$ENV_FILE"; then
@@ -52,11 +52,11 @@ else
 fi
 
 # Criar um link simbólico para o Arcee CLI na pasta local bin
-mkdir -p "mcp-server-tess-xtp/crew-integration/bin"
-ln -sf "$ARCEE_PATH" "mcp-server-tess-xtp/crew-integration/bin/arcee"
+mkdir -p "mcp-server-tess/crew-integration/bin"
+ln -sf "$ARCEE_PATH" "mcp-server-tess/crew-integration/bin/arcee"
 
 # Adicionar a pasta bin ao PATH dentro do script setup_fix.sh
-SETUP_SCRIPT="mcp-server-tess-xtp/crew-integration/setup_fix.sh"
+SETUP_SCRIPT="mcp-server-tess/crew-integration/setup_fix.sh"
 
 if grep -q "PATH=\$PATH:\$PWD/bin" "$SETUP_SCRIPT"; then
     echo -e "${BLUE}PATH já configurado no setup_fix.sh${NC}"
@@ -82,10 +82,10 @@ if [ $? -eq 0 ]; then
     "$ARCEE_PATH" --help | grep -A 10 "Commands:"
     echo ""
     echo -e "${BLUE}Para usar o Arcee CLI diretamente:${NC}"
-    echo "  mcp-server-tess-xtp/crew-integration/bin/arcee"
+    echo "  mcp-server-tess/crew-integration/bin/arcee"
     echo ""
     echo -e "${BLUE}Para iniciar a aplicação Streamlit com suporte ao Arcee:${NC}"
-    echo "  cd mcp-server-tess-xtp/crew-integration && ./setup_fix.sh"
+    echo "  cd mcp-server-tess/crew-integration && ./setup_fix.sh"
 else
     echo -e "${RED}❌ Erro ao testar o Arcee CLI${NC}"
     echo "Verifique se o arquivo existe e tem permissão de execução"

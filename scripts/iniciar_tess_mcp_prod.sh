@@ -16,7 +16,7 @@ echo -e "${GREEN}=== Iniciando Servidor MCP-TESS em segundo plano ===${NC}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 # Corrigindo o caminho para o diretório correto do servidor
-SERVIDOR_DIR="$PROJECT_ROOT/mcp-server-tess-xtp"
+SERVIDOR_DIR="$PROJECT_ROOT/mcp-server-tess"
 
 # Verifica se o servidor já está rodando
 if pgrep -f "node.*server.js" > /dev/null; then
