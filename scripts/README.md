@@ -101,6 +101,6 @@ Para contribuir com o desenvolvimento, clone o repositório e execute o setup:
 
 ```bash
 git clone [URL_DO_REPOSITÓRIO]
-cd mcp-server-tess-xtp
+cd mcp-server-tess
 ./scripts/setup.sh
 ``` 

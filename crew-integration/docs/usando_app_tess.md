@@ -13,7 +13,7 @@ Este guia explica como utilizar a aplicação Streamlit para gerar anúncios par
 Para iniciar a aplicação, execute o script `start_app_tess.sh` no terminal:
 
 ```bash
-cd mcp-server-tess-xtp/crew-integration
+cd mcp-server-tess/crew-integration
 ./start_app_tess.sh
 ```
 

@@ -19,7 +19,7 @@ Esta é uma interface gráfica baseada em Streamlit para interagir com o servido
 1. Clone este repositório
 2. Navegue até a pasta da aplicação Streamlit:
    ```bash
-   cd mcp-server-tess-xtp/streamlit-app
+   cd mcp-server-tess/streamlit-app
    ```
 3. Execute o script de inicialização:
    ```bash

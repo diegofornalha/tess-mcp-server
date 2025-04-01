@@ -31,8 +31,8 @@ TESS-MCP Server é um adaptador que permite utilizar os agentes TESS através do
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/diegofornalha/mcp-server-tess-xtp.git
-cd mcp-server-tess-xtp
+git clone https://github.com/diegofornalha/mcp-server-tess.git
+cd mcp-server-tess
 ```
 
 2. Execute o script de configuração:
@@ -142,7 +142,7 @@ git init
 git add .
 git commit -m "Versão inicial do servidor TESS-MCP"
 git branch -M main
-git remote add origin https://github.com/seu-usuario/mcp-server-tess-xtp.git
+git remote add origin https://github.com/seu-usuario/mcp-server-tess.git
 git push -u origin main
 ```
 
@@ -167,7 +167,7 @@ npm run smithery:publish
 
 4. Após a publicação, usuários poderão instalar o servidor com:
 ```bash
-npx -y @smithery/cli@latest install @seu-usuario/mcp-server-tess-xtp --client claude --config '{"TESS_API_KEY":"sua_chave_api"}'
+npx -y @smithery/cli@latest install @seu-usuario/mcp-server-tess --client claude --config '{"TESS_API_KEY":"sua_chave_api"}'
 ```
 
 5. Para testar localmente antes de publicar:

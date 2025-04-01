@@ -7,7 +7,7 @@ Este guia explica como utilizar a aplicação Streamlit para filtrar e visualiza
 Para iniciar a aplicação, execute o script `start_filtro_agentes.sh` no terminal:
 
 ```bash
-cd mcp-server-tess-xtp/crew-integration
+cd mcp-server-tess/crew-integration
 chmod +x start_filtro_agentes.sh
 ./start_filtro_agentes.sh
 ```

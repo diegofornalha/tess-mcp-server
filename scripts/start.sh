@@ -46,13 +46,13 @@ echo ""
 
 # Executar com nodemon para desenvolvimento, ou node para produção
 if [ "$1" = "--prod" ]; then
-    node mcp-adapter.js
+    node src/index.js
 else
     if command -v nodemon &> /dev/null; then
         echo "🔄 Modo de desenvolvimento ativado (hot-reload)."
-        nodemon mcp-adapter.js
+        nodemon src/index.js
     else
         echo "⚠️ Nodemon não encontrado, usando node padrão."
-        node mcp-adapter.js
+        node src/index.js
     fi
 fi 

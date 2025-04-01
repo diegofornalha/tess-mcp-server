@@ -1,6 +1,6 @@
-# Guia de Publicação: MCP-Server-TESS-XTP no MCP.run
+# Guia de Publicação: mcp-server-tess no MCP.run
 
-Este guia detalha o processo completo para publicar e atualizar o plugin MCP-Server-TESS-XTP na plataforma MCP.run, desde a configuração inicial até o processo de atualização.
+Este guia detalha o processo completo para publicar e atualizar o plugin mcp-server-tess na plataforma MCP.run, desde a configuração inicial até o processo de atualização.
 
 ## Pré-requisitos
 
@@ -60,8 +60,8 @@ export XTP_TOKEN=xtp0_AZXRKn90dEmxthgTLM5EwvTuX-rzoZjD7O85UpdlYsN2BFyJRCihkw
 ### Clonando o repositório (se ainda não tiver feito)
 
 ```bash
-git clone https://github.com/diegofornalha/mcp-server-tess-xtp.git
-cd mcp-server-tess-xtp
+git clone https://github.com/diegofornalha/mcp-server-tess.git
+cd mcp-server-tess
 ```
 
 ### Instalando dependências
@@ -342,7 +342,7 @@ Este cliente gerencia:
 ## 13. Recursos adicionais
 
 - [Documentação do XTP](https://xtp.dylibso.com/docs)
-- [Repositório GitHub do plugin](https://github.com/diegofornalha/mcp-server-tess-xtp)
+- [Repositório GitHub do plugin](https://github.com/diegofornalha/mcp-server-tess)
 - [API TESS](https://tess.pareto.io/api)
 - [MCP.run](https://www.mcp.run)
 - [Documentação MCP SSE](https://www.mcp.run/docs/sse)

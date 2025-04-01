@@ -11,14 +11,14 @@ const ROOT_DIR = path.join(__dirname, '..');
 
 // Configuração do Smithery
 const smitheryConfig = {
-  name: 'mcp-server-tess-xtp',
+  name: 'mcp-server-tess',
   description: 'Servidor MCP para integração com a API TESS, permitindo utilizar agentes TESS via MCP.',
   version: '1.0.0',
   main: './mcp-adapter.js',
   license: 'MIT',
   author: 'TESS Team',
-  homepage: 'https://github.com/diegofornalha/mcp-server-tess-xtp',
-  repository: 'https://github.com/diegofornalha/mcp-server-tess-xtp',
+  homepage: 'https://github.com/diegofornalha/mcp-server-tess',
+  repository: 'https://github.com/diegofornalha/mcp-server-tess',
   configSchema: {
     type: 'object',
     properties: {
@@ -61,7 +61,7 @@ const smitheryConfig = {
 };
 
 // Converter para YAML
-const yaml = `# Configuração do Smithery para mcp-server-tess-xtp
+const yaml = `# Configuração do Smithery para mcp-server-tess
 name: ${smitheryConfig.name}
 description: ${smitheryConfig.description}
 version: ${smitheryConfig.version}

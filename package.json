@@ -1,15 +1,17 @@
 {
-  "name": "mcp-server-tess-xtp",
+  "name": "mcp-server-tess",
   "version": "1.0.0",
   "description": "Servidor TESS integrado com MCP usando protocolo HTTP",
-  "main": "mcp-adapter.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "./scripts/start.sh",
-    "dev": "nodemon mcp-adapter.js",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "mcp-adapter": "node mcp-adapter.js",
     "setup": "./scripts/setup.sh",
     "smithery:build": "node ./scripts/smithery-build.js",
-    "smithery:publish": "npx @smithery/cli@latest publish"
+    "smithery:publish": "npx @smithery/cli@latest publish",
+    "yolo": "node ./scripts/auto-run.js --start-server",
+    "yolo:shell": "./scripts/yolo.sh"
   },
   "keywords": [
     "tess",
@@ -23,12 +25,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/diegofornalha/mcp-server-tess-xtp.git"
+    "url": "git+https://github.com/diegofornalha/mcp-server-tess.git"
   },
   "bugs": {
-    "url": "https://github.com/diegofornalha/mcp-server-tess-xtp/issues"
+    "url": "https://github.com/diegofornalha/mcp-server-tess/issues"
   },
-  "homepage": "https://github.com/diegofornalha/mcp-server-tess-xtp#readme",
+  "homepage": "https://github.com/diegofornalha/mcp-server-tess#readme",
   "dependencies": {
     "axios": "^1.8.4",
     "cors": "^2.8.5",
