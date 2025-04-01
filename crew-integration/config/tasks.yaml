@@ -1,0 +1,29 @@
+analyze_request_task:
+  description: >
+    Analisar a solicitação do usuário, entender a intenção e determinar quais 
+    ferramentas TESS serão necessárias para atender ao pedido
+  expected_output: >
+    Um plano detalhado com a intenção identificada do usuário, quais ferramentas TESS
+    devem ser usadas, quais parâmetros são necessários, e como você recomenda organizar 
+    os agentes para o trabalho. Seja específico sobre quais ferramentas TESS usar e por quê.
+  agent: lead_agent
+
+execute_tools_task:
+  description: >
+    Executar as ferramentas TESS identificadas na análise, 
+    seguindo o plano definido pelo agente principal
+  expected_output: >
+    Resultados das execuções das ferramentas TESS, incluindo dados obtidos, 
+    status das operações, e qualquer informação relevante. 
+    Em caso de erros, documente claramente o que aconteceu.
+  agent: tess_agent
+
+format_response_task:
+  description: >
+    Organizar e formatar os resultados obtidos para apresentação ao usuário final,
+    garantindo clareza, relevância e utilidade
+  expected_output: >
+    Uma resposta final formatada de forma estruturada, clara e útil, 
+    que comunique efetivamente os resultados obtidos com as ferramentas TESS.
+    A resposta deve ser direta e amigável, focando apenas no que é relevante.
+  agent: content_agent 
