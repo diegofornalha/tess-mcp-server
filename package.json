@@ -1,6 +1,6 @@
 {
   "name": "mcp-server-tess",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Servidor TESS integrado com MCP usando protocolo HTTP",
   "main": "src/index.js",
   "scripts": {

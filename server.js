@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const PLUGIN_PATH = path.join(__dirname, 'target/wasm32-wasip1/release/mcp_server_tess_xtp.wasm');
 
 let plugin = null;

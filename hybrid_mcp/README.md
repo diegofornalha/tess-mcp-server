@@ -7,7 +7,7 @@ O servidor mantém a mesma interface que a versão Node.js + Rust, tornando-o co
 
 - Implementação completa das rotas do TESS-MCP
 - Compatibilidade total com o Arcee CLI
-- Roda na porta 3000 por padrão (mesma porta do servidor original)
+- Roda na porta 3001 por padrão (mesma porta do servidor original)
 - Fácil de estender com novas ferramentas
 
 ## Ferramentas Implementadas
@@ -47,13 +47,13 @@ python fastapi_server.py
 
 ```bash
 # Verificar saúde
-curl http://localhost:3000/health
+curl http://localhost:3001/health
 
 # Listar ferramentas
-curl "http://localhost:3000/api/mcp/tools?session_id=test"
+curl "http://localhost:3001/api/mcp/tools?session_id=test"
 
 # Executar uma ferramenta
-curl -X POST "http://localhost:3000/api/mcp/execute?session_id=test" \
+curl -X POST "http://localhost:3001/api/mcp/execute?session_id=test" \
      -H "Content-Type: application/json" \
      -d '{"tool":"search_info","params":{"query":"Python"}}'
 ```
@@ -61,7 +61,7 @@ curl -X POST "http://localhost:3000/api/mcp/execute?session_id=test" \
 3. Usar com Arcee CLI:
 
 ```bash
-# O Arcee CLI já está configurado para usar http://localhost:3000/api
+# O Arcee CLI já está configurado para usar http://localhost:3001/api
 arcee mcp listar
 arcee mcp executar search_info --query "Python"
 ```

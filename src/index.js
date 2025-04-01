@@ -42,7 +42,7 @@ function createServer(config = {}) {
   app.get('/health', (req, res) => {
     res.json({
       status: 'ok',
-      version: '1.0.0',
+      version: '1.0.1',
       message: 'TESS-MCP Server em execução'
     });
   });

@@ -178,7 +178,7 @@ async def execute_tool(request: Request):
 # ----- Iniciar o servidor -----
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", "3000"))
+    port = int(os.environ.get("PORT", "3001"))
     logger.info(f"Iniciando servidor TESS MCP na porta {port}")
     
     uvicorn.run(app, host="0.0.0.0", port=port) 

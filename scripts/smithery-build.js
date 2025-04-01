@@ -64,12 +64,12 @@ async function main() {
       const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
       
       if (packageJson.version !== smitheryConfig.version) {
-        log.warn(`Versão no package.json (${packageJson.version}) difere do smithery.yaml (${smitheryConfig.version}).`);
+        log.warn(`Versão no smithery.yaml (${smitheryConfig.version}) difere do package.json (${packageJson.version}).`);
         
-        // Atualizar package.json com versão do smithery.yaml
-        packageJson.version = smitheryConfig.version;
-        fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2));
-        log.success(`Versão no package.json atualizada para ${smitheryConfig.version}`);
+        // Atualizar smithery.yaml com versão do package.json
+        smitheryConfig.version = packageJson.version;
+        fs.writeFileSync(smitheryPath, yaml.dump(smitheryConfig));
+        log.success(`Versão no smithery.yaml atualizada para ${packageJson.version}`);
       } else {
         log.success(`Versões sincronizadas (${packageJson.version})`);
       }
