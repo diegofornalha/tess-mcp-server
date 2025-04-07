@@ -1,0 +1,37 @@
+name: mcp-server-tess
+description: "Servidor MCP para integração com a API TESS, permitindo utilizar agentes TESS via MCP"
+version: 1.0.1
+main: "src/index.js"
+license: "MIT"
+author: "TESS Team"
+homepage: "https://github.com/diegofornalha/mcp-server-tess"
+repository: "https://github.com/diegofornalha/mcp-server-tess"
+
+configSchema:
+  $schema: "http://json-schema.org/draft-07/schema#"
+  type: "object"
+  additionalProperties: false
+  properties:
+    TESS_API_KEY:
+      type: "string"
+      description: "Chave de API TESS (obrigatória)"
+    TESS_API_URL:
+      type: "string"
+      description: "URL da API TESS (opcional)"
+      default: "https://tess.pareto.io/api"
+    PORT:
+      type: "integer"
+      description: "Porta para o servidor MCP"
+      default: 3001
+  required:
+    - "TESS_API_KEY"
+
+engines:
+  node: ">=18.0.0"
+keywords:
+  - "tess"
+  - "mcp"
+  - "ai"
+  - "model-context-protocol"
+  - "agent"
+  - "smithery" 

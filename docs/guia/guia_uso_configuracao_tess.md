@@ -225,7 +225,7 @@ def __init__(self):
     """Inicializa o provedor TESS com a API key do ambiente."""
     self.api_key = os.getenv("TESS_API_KEY")
     self.api_url = os.getenv("TESS_API_URL", "https://tess.pareto.io/api")
-    self.local_server_url = os.getenv("TESS_LOCAL_SERVER_URL", "http://localhost:3000")
+    self.local_server_url = os.getenv("TESS_LOCAL_SERVER_URL", "http://localhost:3001")
     self.use_local_server = os.getenv("USE_LOCAL_TESS", "True").lower() in ("true", "1", "t")
 ```
 
@@ -246,7 +246,7 @@ Para configurar o sistema, adicione as seguintes variáveis de ambiente:
 # .env
 TESS_API_KEY=your_api_key_here
 TESS_API_URL=https://tess.pareto.io/api
-TESS_LOCAL_SERVER_URL=http://localhost:3000
+TESS_LOCAL_SERVER_URL=http://localhost:3001
 USE_LOCAL_TESS=True
 ```
 
@@ -261,7 +261,7 @@ USE_LOCAL_TESS=True
 #### 2. Verificar Funcionamento
 
 ```bash
-curl http://localhost:3000/health
+curl http://localhost:3001/health
 ```
 
 #### 3. Executar o Chat

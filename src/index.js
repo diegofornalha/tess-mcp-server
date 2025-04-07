@@ -15,7 +15,7 @@ module.exports = {
   getMcpConfig: () => {
     return {
       name: 'mcp-server-tess',
-      version: '1.0.0',
+      version: '1.0.1',
       description: 'Servidor MCP para integração com TESS',
       tessApiUrl: process.env.TESS_API_URL || 'https://tess.pareto.io/api'
     };

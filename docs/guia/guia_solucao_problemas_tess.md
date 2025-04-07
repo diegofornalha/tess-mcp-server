@@ -187,7 +187,7 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 // Criar um servidor HTTP simples
 const server = http.createServer((req, res) => {
@@ -269,7 +269,7 @@ Para verificar se as soluções estão funcionando corretamente:
 2. **Para o servidor local**:
    ```bash
    ./scripts/start_tess_server_background.sh
-   curl http://localhost:3000/health
+   curl http://localhost:3001/health
    ```
 
 3. **Para o comando arcee**:

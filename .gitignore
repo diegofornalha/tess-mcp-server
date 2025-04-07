@@ -28,4 +28,7 @@ logs/
 
 # Arquivos de sistema
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Diretórios específicos do projeto
+MCP-SERVER-TESS-RUN/ 

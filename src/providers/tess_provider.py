@@ -47,7 +47,7 @@ class TessProvider:
         
         self.api_key = os.getenv("TESS_API_KEY")
         self.api_url = os.getenv("TESS_API_URL", "https://tess.pareto.io/api")
-        self.local_server_url = os.getenv("TESS_LOCAL_SERVER_URL", "http://localhost:3000")
+        self.local_server_url = os.getenv("TESS_LOCAL_SERVER_URL", "http://localhost:3001")
         self.use_local_server = os.getenv("USE_LOCAL_TESS", "True").lower() in ("true", "1", "t")
         
         # Tentar usar a implementação da infraestrutura se disponível

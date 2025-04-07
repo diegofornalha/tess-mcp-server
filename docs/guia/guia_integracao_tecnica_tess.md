@@ -221,7 +221,7 @@ def __init__(self, api_key: Optional[str] = None, api_url: Optional[str] = None)
     """Inicializa o provedor TESS com a API key do ambiente."""
     self.api_key = api_key or os.getenv("TESS_API_KEY")
     self.api_url = api_url or os.getenv("TESS_API_URL", "https://tess.pareto.io/api")
-    self.local_server_url = os.getenv("TESS_LOCAL_SERVER_URL", "http://localhost:3000")
+    self.local_server_url = os.getenv("TESS_LOCAL_SERVER_URL", "http://localhost:3001")
     self.use_local_server = os.getenv("USE_LOCAL_TESS", "False").lower() in ("true", "1", "t")
     
     # Verificar se temos API key
@@ -467,7 +467,7 @@ export MCP_API_URL="https://www.mcp.run/api"
 
 # Configuração do servidor local (opcional)
 export USE_LOCAL_TESS="False"
-export TESS_LOCAL_SERVER_URL="http://localhost:3000"
+export TESS_LOCAL_SERVER_URL="http://localhost:3001"
 ```
 
 ### Armazenamento de Credenciais

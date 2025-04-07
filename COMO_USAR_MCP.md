@@ -77,7 +77,7 @@ console.log('Hello, world!');
 
 ### Edição cirúrgica de arquivos
 ```
-No arquivo server.js, altere a porta de 3000 para 8080.
+No arquivo server.js, altere a porta de 3001 para 8080.
 ```
 
 ### Listar diretório
